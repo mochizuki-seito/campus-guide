@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import campusMapImg from '../assets/campus-map.jpg';
 import FloorViewer from './FloorViewer';
+import ThreeCampusViewer from './ThreeCampusViewer';
 import { FACILITIES } from '../data/facilities';
 
 const BUILDINGS = [
@@ -16,7 +17,8 @@ export default function CampusMap() {
   const [selectedBuilding, setSelectedBuilding] = useState(null);
   const [selectedFloor, setSelectedFloor] = useState(null);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
-  
+  const [is3DMode, setIs3DMode] = useState(false);
+
   // 検索用のキーワード状態
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -151,9 +153,17 @@ export default function CampusMap() {
       {/* サイドパネル */}
       <div className="w-full md:w-80 bg-white p-6 shadow-xl border-l border-slate-200 flex flex-col justify-between z-10">
         <div>
-          <h1 className="text-xl font-bold text-slate-900 border-b pb-3 mb-4">
-            有明キャンパス 案内
-          </h1>
+          <div className="flex items-center justify-between border-b pb-3 mb-4">
+            <h1 className="text-xl font-bold text-slate-900">
+              有明キャンパス 案内
+            </h1>
+            <button
+              onClick={() => setIs3DMode(true)}
+              className="px-3 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold rounded-lg shadow-md transition flex items-center gap-1"
+            >
+              <span>🧊 3Dビュー</span>
+            </button>
+          </div>
 
           <div className="mb-6">
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
@@ -222,13 +232,18 @@ export default function CampusMap() {
         </div>
       </div>
 
-      {/* モーダル表示 */}
+      {/* 2D図面モーダル表示 */}
       {isViewerOpen && (
         <FloorViewer
           building={selectedBuilding}
           floor={selectedFloor}
           onClose={() => setIsViewerOpen(false)}
         />
+      )}
+
+      {/* 3Dビューモード */}
+      {is3DMode && (
+        <ThreeCampusViewer onClose={() => setIs3DMode(false)} />
       )}
 
     </div>
