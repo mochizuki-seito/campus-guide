@@ -220,13 +220,20 @@ function PlayerController({
   }, [isPortrait, camera]);
 
   const checkCollision = (nextX, nextZ) => {
-    const isInsideBuilding = floorData.buildingZones?.some(
-      (z) =>
-        nextX >= z.minX + 0.5 &&
-        nextX <= z.maxX - 0.5 &&
-        nextZ >= z.minZ + 0.5 &&
-        nextZ <= z.maxZ - 0.5
-    );
+    // いずれかの建物・通路ゾーンの内部にいるか判定（境界線ぴったりでも接続）
+    const isPointInAnyZone = (px, pz) =>
+      floorData.buildingZones?.some(
+        (z) => px >= z.minX && px <= z.maxX && pz >= z.minZ && pz <= z.maxZ
+      );
+
+    const wallMargin = 0.35;
+    const isInsideBuilding =
+      isPointInAnyZone(nextX, nextZ) &&
+      isPointInAnyZone(nextX - wallMargin, nextZ) &&
+      isPointInAnyZone(nextX + wallMargin, nextZ) &&
+      isPointInAnyZone(nextX, nextZ - wallMargin) &&
+      isPointInAnyZone(nextX, nextZ + wallMargin);
+
     if (!isInsideBuilding) return true;
 
     const margin = 0.45;

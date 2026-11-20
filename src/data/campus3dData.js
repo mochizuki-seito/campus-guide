@@ -224,9 +224,10 @@ export const CAMPUS_3D_BUILDINGS = {
         spawn: [0, 40],
         buildingZones: [
           { name: '1号館', minX: -40, maxX: 40, minZ: 26, maxZ: 50, floorColor: '#e2e8f0' },
-          { name: '2号館', minX: -40, maxX: -10, minZ: -10, maxZ: 26, floorColor: '#fef9c3' },
-          { name: '6号館', minX: 4, maxX: 38, minZ: -14, maxZ: 26, floorColor: '#dcfce7' },
-          { name: '3号館', minX: -24, maxX: 38, minZ: -52, maxZ: -14, floorColor: '#ffedd5' },
+          { name: '2号館', minX: -40, maxX: -12, minZ: -10, maxZ: 26, floorColor: '#fef9c3' },
+          { name: 'キャンパスデッキ', minX: -12, maxX: 16, minZ: -38, maxZ: 26, floorColor: '#e0f2fe' },
+          { name: '6号館', minX: 6, maxX: 38, minZ: -16, maxZ: 24, floorColor: '#dcfce7' },
+          { name: '3号館', minX: 6, maxX: 38, minZ: -52, maxZ: -16, floorColor: '#ffedd5' },
         ],
         voids: [],
         connectors: [
