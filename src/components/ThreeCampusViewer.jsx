@@ -4,9 +4,9 @@ import { OrbitControls, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { CAMPUS_3D_BUILDINGS } from '../data/campus3dData';
 
-// 4号館・5号館のワールド座標オフセット（大通りの東側に配置）
-const BLDG4_OFFSET = { x: 104, z: 18 };
-const BLDG5_OFFSET = { x: 104, z: -26 };
+// 4号館・5号館のワールド座標オフセット（2号館側＝西側の大通り向こうに配置）
+const BLDG4_OFFSET = { x: -116, z: 18 };
+const BLDG5_OFFSET = { x: -116, z: -26 };
 
 // スマホ用 360度バーチャルスティック
 function VirtualJoystick({ joystickRef }) {
@@ -92,7 +92,6 @@ function VirtualJoystick({ joystickRef }) {
 function buildConnectedRooms(rawRooms, buildingZones) {
   if (!rawRooms || rawRooms.length === 0) return [];
 
-  // 1. 各部屋の境界ボックスを計算し、外壁（buildingZonesの端）にスナップ
   const boxes = rawRooms.map((r) => {
     let minX = r.x - r.w / 2;
     let maxX = r.x + r.w / 2;
@@ -119,14 +118,13 @@ function buildConnectedRooms(rawRooms, buildingZones) {
     return { ...r, minX, maxX, minZ, maxZ, zone };
   });
 
-  // 2. 隣り合う教室同士の小さな隙間（2.3m以下）を埋めて密着させる
+  // 隣り合う教室同士の小さな隙間を埋めて密着させる
   for (let i = 0; i < boxes.length; i++) {
     for (let j = i + 1; j < boxes.length; j++) {
       const a = boxes[i];
       const b = boxes[j];
       if (a.zone && b.zone && a.zone !== b.zone) continue;
 
-      // Z方向が重なっていてX方向に隣接している場合
       const overlapZ = Math.min(a.maxZ, b.maxZ) - Math.max(a.minZ, b.minZ);
       if (overlapZ > 1.0) {
         const gapAB = b.minX - a.maxX;
@@ -143,7 +141,6 @@ function buildConnectedRooms(rawRooms, buildingZones) {
         }
       }
 
-      // X方向が重なっていてZ方向に隣接している場合
       const overlapX = Math.min(a.maxX, b.maxX) - Math.max(a.minX, b.minX);
       if (overlapX > 1.0) {
         const gapAB = b.minZ - a.maxZ;
@@ -162,7 +159,7 @@ function buildConnectedRooms(rawRooms, buildingZones) {
     }
   }
 
-  // 3. 廊下（空きスペース）に面している辺を自動判定して入り口（doorSide）を決定
+  // 廊下に面している辺を判定してドア開口を設定
   return boxes.map((box, idx) => {
     const x = (box.minX + box.maxX) / 2;
     const z = (box.minZ + box.maxZ) / 2;
@@ -195,8 +192,6 @@ function buildConnectedRooms(rawRooms, buildingZones) {
           c.pz <= other.maxZ + 0.2
       );
       if (!blockedByOtherRoom) score += 20;
-
-      // 入り口に十分な幅がある面を優先
       score += Math.min(c.len, 6) * 0.2;
 
       if (score > bestScore) {
@@ -206,7 +201,7 @@ function buildConnectedRooms(rawRooms, buildingZones) {
     }
 
     const sideLen = bestSide === 'north' || bestSide === 'south' ? w : d;
-    const doorWidth = Math.min(2.2, Math.max(1.4, sideLen * 0.55));
+    const doorWidth = Math.min(2.2, Math.max(1.2, sideLen * 0.55));
 
     return {
       ...box,
@@ -283,7 +278,7 @@ function BrickArchFacade({ position, rotation = [0, 0, 0], count = 4, width = 3.
   );
 }
 
-// キャンパス外観・中庭・屋外大階段・大通り・全号館シルエット
+// キャンパス外観・中庭・屋外大階段・2号館側大通り・4号館＆5号館シルエット
 // ※プレイヤーが建物の中に入ると、その建物の外壁は自動で非表示になる！
 function CampusScenery({ currentFloor, insideGroup }) {
   const floorNum = parseInt(currentFloor.replace('F', ''), 10) || 1;
@@ -296,33 +291,32 @@ function CampusScenery({ currentFloor, insideGroup }) {
   return (
     <group>
       {/* 広大な緑地ベース */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[45, groundY - 0.18, 0]} receiveShadow>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-45, groundY - 0.18, 0]} receiveShadow>
         <planeGeometry args={[560, 560]} />
         <meshStandardMaterial color="#86efac" roughness={0.95} />
       </mesh>
 
-      {/* 西側キャンパス（1・2・3・6号館）敷地舗装 */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, groundY - 0.1, 0]} receiveShadow>
-        <planeGeometry args={[92, 118]} />
+      {/* メインキャンパス（1・2・3・6号館）敷地舗装 */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-5, groundY - 0.1, 0]} receiveShadow>
+        <planeGeometry args={[102, 118]} />
         <meshStandardMaterial color="#d6d3d1" roughness={0.85} />
       </mesh>
 
-      {/* 東側キャンパス（4・5号館）敷地舗装 */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[104, groundY - 0.1, -4]} receiveShadow>
+      {/* 西側キャンパス（4・5号館）敷地舗装（2号館側・大通りの向こう） */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-116, groundY - 0.1, -4]} receiveShadow>
         <planeGeometry args={[68, 108]} />
         <meshStandardMaterial color="#d6d3d1" roughness={0.85} />
       </mesh>
 
       {/* =================================================================== */}
-      {/* 1. 中庭（パティオ）のレンガ舗装遊歩道＆屋外大階段（写真1・写真4準拠）    */}
+      {/* 1. 中庭（パティオ）のレンガ舗装遊歩道＆屋外大階段                    */}
       {/* =================================================================== */}
-      {/* 中庭中央の赤茶色レンガタイル遊歩道 */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-3, groundY - 0.03, 7]} receiveShadow>
         <planeGeometry args={[8.5, 38]} />
         <meshStandardMaterial color="#9a3412" roughness={0.85} />
       </mesh>
 
-      {/* 中庭奥（2号館と6号館の突き当たり左：X=-9〜-1, Z=-14〜-2）の屋外大階段 */}
+      {/* 中庭奥の屋外大階段（X=-9〜-1, Z=-14〜-2） */}
       <group position={[-5, groundY, -2]}>
         {Array.from({ length: 14 }).map((_, i) => {
           const stepY = (i + 0.5) * (3.4 / 14);
@@ -334,7 +328,6 @@ function CampusScenery({ currentFloor, insideGroup }) {
             </mesh>
           );
         })}
-        {/* 大階段の両脇手すり壁 */}
         <mesh position={[-4.0, 2.0, -6]} rotation={[0.275, 0, 0]}>
           <boxGeometry args={[0.35, 1.1, 12.6]} />
           <meshStandardMaterial color="#a8a29e" />
@@ -422,7 +415,7 @@ function CampusScenery({ currentFloor, insideGroup }) {
             height={6.2}
           />
 
-          {/* 屋外大階段の右隣（3号館〜6号館接続部 Z=-14）の2連レンガアーチファサード */}
+          {/* 屋外大階段の右隣の2連レンガアーチファサード */}
           <BrickArchFacade position={[7.5, groundY, -14]} count={3} width={3.6} height={6.2} />
           <mesh position={[7.5, groundY + 8.6, -14]}>
             <boxGeometry args={[11, 4.5, 0.5]} />
@@ -456,10 +449,10 @@ function CampusScenery({ currentFloor, insideGroup }) {
       )}
 
       {/* =================================================================== */}
-      {/* 3. 中央大通り・横断歩道・2F空中歩行者デッキ（4号館・5号館へ徒歩接続）   */}
+      {/* 3. 2号館側（西側 X=-68）の大通り・横断歩道・2F空中歩行者デッキ        */}
       {/* =================================================================== */}
-      <group position={[56, groundY - 0.05, 0]}>
-        {/* 片側2車線の大通り（X=47〜65） */}
+      <group position={[-68, groundY - 0.05, 0]}>
+        {/* 片側2車線の大通り（X = -77 〜 -59） */}
         <mesh rotation={[-Math.PI / 2, 0, 0]}>
           <planeGeometry args={[18, 280]} />
           <meshStandardMaterial color="#334155" roughness={0.9} />
@@ -474,9 +467,9 @@ function CampusScenery({ currentFloor, insideGroup }) {
           <meshStandardMaterial color="#15803d" />
         </mesh>
 
-        {/* 1F地上徒歩ルート：4号館方面 横断歩道（Z=24） */}
+        {/* 1F地上徒歩ルート：4号館方面 横断歩道（Z=22） */}
         {[-6, -3, 0, 3, 6].map((zOff, i) => (
-          <mesh key={`cw1-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 24 + zOff]}>
+          <mesh key={`cw1-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 22 + zOff]}>
             <planeGeometry args={[16, 1.3]} />
             <meshBasicMaterial color="#f8fafc" />
           </mesh>
@@ -499,18 +492,18 @@ function CampusScenery({ currentFloor, insideGroup }) {
         ))}
       </group>
 
-      {/* 2F高さ（groundY + 3.4）で大通りをまたぐ空中歩行者デッキ（1・2・3・6号館 2F ⇔ 4号館 2F） */}
-      <group position={[56, groundY + 3.4, 23]}>
+      {/* 2F高さ（groundY + 3.4）で大通りをまたぐ空中歩行者デッキ（2号館 2F 正門デッキ ⇔ 4号館 2F） */}
+      <group position={[-64, groundY + 3.4, 21]}>
         <mesh castShadow receiveShadow>
-          <boxGeometry args={[42, 0.4, 12]} />
+          <boxGeometry args={[48, 0.4, 12]} />
           <meshStandardMaterial color="#e2e8f0" roughness={0.6} />
         </mesh>
         <mesh position={[0, 0.65, 5.8]}>
-          <boxGeometry args={[42, 0.9, 0.15]} />
+          <boxGeometry args={[48, 0.9, 0.15]} />
           <meshStandardMaterial color="#94a3b8" />
         </mesh>
         <mesh position={[0, 0.65, -5.8]}>
-          <boxGeometry args={[42, 0.9, 0.15]} />
+          <boxGeometry args={[48, 0.9, 0.15]} />
           <meshStandardMaterial color="#94a3b8" />
         </mesh>
       </group>
@@ -520,7 +513,7 @@ function CampusScenery({ currentFloor, insideGroup }) {
       {/* =================================================================== */}
       {show4Walls && (
         <group position={[BLDG4_OFFSET.x, groundY, BLDG4_OFFSET.z]}>
-          {/* 4号館 南側教室棟の外観（5階建て） */}
+          {/* 4号館 南側外壁（5階建て） */}
           <mesh position={[0, 8.5, 18.2]} castShadow>
             <boxGeometry args={[56, 17, 0.6]} />
             <meshStandardMaterial color="#f5f5f4" />
@@ -529,13 +522,13 @@ function CampusScenery({ currentFloor, insideGroup }) {
             <boxGeometry args={[56.2, 6.0, 0.65]} />
             <meshStandardMaterial color="#9a3412" />
           </mesh>
-          {/* 4号館 東側外壁 */}
-          <mesh position={[28.2, 8.5, 3]} castShadow>
-            <boxGeometry args={[0.6, 17, 42]} />
+          {/* 4号館 西側外壁 */}
+          <mesh position={[-28.2, 8.5, 1]} castShadow>
+            <boxGeometry args={[0.6, 17, 34]} />
             <meshStandardMaterial color="#f5f5f4" />
           </mesh>
-          <mesh position={[28.3, 3.0, 3]}>
-            <boxGeometry args={[0.65, 6.0, 42.2]} />
+          <mesh position={[-28.3, 3.0, 1]}>
+            <boxGeometry args={[0.65, 6.0, 34.2]} />
             <meshStandardMaterial color="#9a3412" />
           </mesh>
         </group>
@@ -546,12 +539,12 @@ function CampusScenery({ currentFloor, insideGroup }) {
       {/* =================================================================== */}
       {show5Walls && (
         <group position={[BLDG5_OFFSET.x, groundY, BLDG5_OFFSET.z]}>
-          {/* 5号館 北・東・南の外壁（7階建て） */}
+          {/* 5号館 北・西の外壁（7階建て） */}
           <mesh position={[0, 12, -22.2]} castShadow>
             <boxGeometry args={[44, 24, 0.6]} />
             <meshStandardMaterial color="#f5f5f4" />
           </mesh>
-          <mesh position={[22.2, 12, 0]} castShadow>
+          <mesh position={[-22.2, 12, 0]} castShadow>
             <boxGeometry args={[0.6, 24, 44]} />
             <meshStandardMaterial color="#f5f5f4" />
           </mesh>
@@ -562,12 +555,12 @@ function CampusScenery({ currentFloor, insideGroup }) {
         </group>
       )}
 
-      {/* 周囲の公園・緑地（ロハスカフェ北側・5号館東側） */}
+      {/* 周囲の公園・緑地（3号館北側・6号館東側水の科学館方面） */}
       {[-25, -10, 5, 20, 32].map((x, i) => (
         <CampusTree key={`park-n-${i}`} position={[x, groundY, -72 - (i % 2) * 7]} scale={1.3} leafColor="#15803d" />
       ))}
-      {[-42, -26, -10, 6, 22].map((z, i) => (
-        <CampusTree key={`park-e-${i}`} position={[136 + (i % 2) * 5, groundY, z]} scale={1.25} leafColor="#15803d" />
+      {[-38, -20, -2, 16, 34].map((z, i) => (
+        <CampusTree key={`park-e-${i}`} position={[56 + (i % 2) * 5, groundY, z]} scale={1.25} leafColor="#15803d" />
       ))}
     </group>
   );
@@ -579,9 +572,8 @@ function RoomBox({ room }) {
   const wallT = 0.24;
   const { w, d, doorSide, doorWidth } = room;
 
-  // 入り口がある辺の左右の袖壁（そでかべ）の幅を計算
   const renderDoorWall = (totalLen, isHorizontal) => {
-    const sideW = Math.max(0.2, (totalLen - doorWidth) / 2);
+    const sideW = Math.max(0.15, (totalLen - doorWidth) / 2);
     const offset = doorWidth / 2 + sideW / 2;
 
     if (isHorizontal) {
@@ -595,7 +587,6 @@ function RoomBox({ room }) {
             <boxGeometry args={[sideW, wallH, wallT]} />
             <meshStandardMaterial color={room.color} transparent opacity={0.68} />
           </mesh>
-          {/* ドア上の垂れ壁（まぐさ） */}
           <mesh position={[0, wallH - 0.35, 0]}>
             <boxGeometry args={[doorWidth, 0.7, wallT]} />
             <meshStandardMaterial color={room.color} transparent opacity={0.68} />
@@ -623,13 +614,11 @@ function RoomBox({ room }) {
 
   return (
     <group position={[room.x, 0, room.z]}>
-      {/* 部屋の床 */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]} receiveShadow>
         <planeGeometry args={[w, d]} />
         <meshStandardMaterial color={room.color} roughness={0.6} />
       </mesh>
 
-      {/* 北壁 (-Z) */}
       <group position={[0, 0, -d / 2]}>
         {doorSide === 'north' ? (
           renderDoorWall(w, true)
@@ -641,7 +630,6 @@ function RoomBox({ room }) {
         )}
       </group>
 
-      {/* 南壁 (+Z) */}
       <group position={[0, 0, d / 2]}>
         {doorSide === 'south' ? (
           renderDoorWall(w, true)
@@ -653,7 +641,6 @@ function RoomBox({ room }) {
         )}
       </group>
 
-      {/* 西壁 (-X) */}
       <group position={[-w / 2, 0, 0]}>
         {doorSide === 'west' ? (
           renderDoorWall(d, false)
@@ -665,7 +652,6 @@ function RoomBox({ room }) {
         )}
       </group>
 
-      {/* 東壁 (+X) */}
       <group position={[w / 2, 0, 0]}>
         {doorSide === 'east' ? (
           renderDoorWall(d, false)
@@ -677,13 +663,11 @@ function RoomBox({ room }) {
         )}
       </group>
 
-      {/* 上部輪郭エッジ */}
       <lineSegments position={[0, wallH / 2, 0]}>
         <edgesGeometry args={[new THREE.BoxGeometry(w, wallH, d)]} />
         <lineBasicMaterial color="#334155" />
       </lineSegments>
 
-      {/* 部屋名ラベル */}
       <Html position={[0, 3.15, 0]} center distanceFactor={26} zIndexRange={[10, 0]}>
         <div className="bg-slate-900/90 text-white px-2 py-0.5 rounded text-[10px] font-bold whitespace-pre-line text-center shadow border border-slate-500 pointer-events-none select-none leading-tight">
           {room.name}
@@ -770,7 +754,7 @@ function PlayerController({
   const controlsRef = useRef();
   const { camera } = useThree();
 
-  const posRef = useRef(new THREE.Vector3(0, 0, 40));
+  const posRef = useRef(new THREE.Vector3(0, 0, 38));
   const rotYRef = useRef(0);
   const lastBldgRef = useRef('');
   const lastGroupRef = useRef(null);
@@ -781,7 +765,6 @@ function PlayerController({
     camera.updateProjectionMatrix();
   }, [isPortrait, camera]);
 
-  // 部屋の壁当たり判定（入り口ドアの開口部だけは通り抜けられる！）
   const isBlockedByRoomWall = (px, pz, room) => {
     const halfW = room.w / 2;
     const halfD = room.d / 2;
@@ -793,32 +776,26 @@ function PlayerController({
     const minZ = room.z - halfD;
     const maxZ = room.z + halfD;
 
-    // 部屋の外接矩形より外側なら衝突なし
     if (px < minX - wallThick || px > maxX + wallThick || pz < minZ - wallThick || pz > maxZ + wallThick) {
       return false;
     }
 
-    // 部屋の内側（壁より内側）なら自由に歩ける
     if (px > minX + wallThick && px < maxX - wallThick && pz > minZ + wallThick && pz < maxZ - wallThick) {
       return false;
     }
 
-    // 北壁 (-Z) 上にいる場合
     if (Math.abs(pz - minZ) <= wallThick && px >= minX - wallThick && px <= maxX + wallThick) {
       if (room.doorSide === 'north' && Math.abs(px - room.x) <= halfDoor) return false;
       return true;
     }
-    // 南壁 (+Z) 上にいる場合
     if (Math.abs(pz - maxZ) <= wallThick && px >= minX - wallThick && px <= maxX + wallThick) {
       if (room.doorSide === 'south' && Math.abs(px - room.x) <= halfDoor) return false;
       return true;
     }
-    // 西壁 (-X) 上にいる場合
     if (Math.abs(px - minX) <= wallThick && pz >= minZ - wallThick && pz <= maxZ + wallThick) {
       if (room.doorSide === 'west' && Math.abs(pz - room.z) <= halfDoor) return false;
       return true;
     }
-    // 東壁 (+X) 上にいる場合
     if (Math.abs(px - maxX) <= wallThick && pz >= minZ - wallThick && pz <= maxZ + wallThick) {
       if (room.doorSide === 'east' && Math.abs(pz - room.z) <= halfDoor) return false;
       return true;
@@ -874,12 +851,11 @@ function PlayerController({
         if (!checkCollision(testX, testZ)) return [testX, testZ];
       }
     }
-    return [0, 40];
+    return [0, 38];
   };
 
-  // テレポート・初期スポーン時のみカメラ位置を移動（階段移動時は滑らかに維持）
   useEffect(() => {
-    const rawTarget = teleportTarget ? teleportTarget.coords : [0, 40];
+    const rawTarget = teleportTarget ? teleportTarget.coords : [0, 38];
     const [safeX, safeZ] = resolveSafePosition(rawTarget[0], rawTarget[1]);
 
     posRef.current.set(safeX, 0, safeZ);
@@ -958,13 +934,13 @@ function PlayerController({
       }
     }
 
-    // 1F中庭の屋外大階段（X: -9〜-1, Z: -14〜-2）での高さ追従＆1F⇔2F自動切替
+    // 1F中庭の屋外大階段での高さ追従＆1F⇔2F自動切替
     let playerY = 0;
     const px = posRef.current.x;
     const pz = posRef.current.z;
 
     if (currentFloor === '1F' && px >= -9 && px <= -1 && pz <= -2 && pz >= -14) {
-      const progress = (-2 - pz) / 12; // 0(下) 〜 1(上)
+      const progress = (-2 - pz) / 12;
       playerY = progress * 3.4;
       if (pz <= -13.4 && stairCooldownRef.current <= 0) {
         stairCooldownRef.current = 1.0;
@@ -981,7 +957,6 @@ function PlayerController({
       playerRef.current.position.y = playerY;
     }
 
-    // 現在どの建物（または屋外）にいるかを判定し、建物内なら外壁を消す
     const currentZone = unifiedFloorData.buildingZones?.find(
       (z) => px >= z.minX && px <= z.maxX && pz >= z.minZ && pz <= z.maxZ
     );
@@ -997,7 +972,6 @@ function PlayerController({
       onInsideGroupChange(insideGroup);
     }
 
-    // エレベーター接近判定
     let foundEv = null;
     for (const ev of unifiedFloorData.elevators) {
       const dist = Math.hypot(px - ev.x, pz - ev.z);
@@ -1011,7 +985,7 @@ function PlayerController({
 
   return (
     <>
-      <group ref={playerRef} position={[0, 0, 40]}>
+      <group ref={playerRef} position={[0, 0, 38]}>
         <mesh position={[0, 0.85, 0]} castShadow>
           <capsuleGeometry args={[0.35, 0.7, 8, 16]} />
           <meshStandardMaterial color="#2563eb" />
@@ -1047,7 +1021,7 @@ export default function ThreeCampusViewer({ onClose }) {
   const [currentSubBldg, setCurrentSubBldg] = useState('1号館');
   const [insideGroup, setInsideGroup] = useState('1236');
   const [nearElevator, setNearElevator] = useState(null);
-  const [teleportTarget, setTeleportTarget] = useState({ coords: [0, 40], ts: 1 });
+  const [teleportTarget, setTeleportTarget] = useState({ coords: [0, 38], ts: 1 });
 
   const [isMobile, setIsMobile] = useState(false);
   const [isPortrait, setIsPortrait] = useState(false);
@@ -1091,7 +1065,7 @@ export default function ThreeCampusViewer({ onClose }) {
     };
   }, []);
 
-  // 全号館（1・2・3・6号館 ＋ 4号館 ＋ 5号館 ＋ 屋外通路・歩行者デッキ）を1つの空間に統合
+  // 全号館（1・2・3・6号館 ＋ 2号館側の4号館・5号館 ＋ 屋外通路・歩行者デッキ）を1つの空間に統合
   const unifiedFloorData = useMemo(() => {
     const d1236 = CAMPUS_3D_BUILDINGS['area-1236'].floors[currentFloor];
     const d4 = CAMPUS_3D_BUILDINGS['area-4'].floors[currentFloor];
@@ -1106,11 +1080,7 @@ export default function ThreeCampusViewer({ onClose }) {
     // 1. 1・2・3・6号館のデータ統合
     if (d1236) {
       d1236.buildingZones?.forEach((z) => {
-        const adjusted =
-          currentFloor === '2F' && z.name === 'キャンパスデッキ'
-            ? { ...z, maxX: 16 }
-            : { ...z };
-        zones.push({ ...adjusted, bldgGroup: '1236', isOutdoor: z.name === 'キャンパスデッキ' });
+        zones.push({ ...z, bldgGroup: '1236', isOutdoor: z.name === 'キャンパスデッキ' });
       });
       d1236.rooms?.forEach((r) => rawRooms.push({ ...r }));
       d1236.voids?.forEach((v) => voids.push({ ...v }));
@@ -1118,7 +1088,7 @@ export default function ThreeCampusViewer({ onClose }) {
       d1236.elevators?.forEach((ev) => elevators.push({ ...ev }));
     }
 
-    // 2. 4号館のデータ統合（大通りの東側へ配置）
+    // 2. 4号館のデータ統合（2号館側＝西側へ配置）
     if (d4) {
       d4.buildingZones?.forEach((z) =>
         zones.push({
@@ -1138,11 +1108,11 @@ export default function ThreeCampusViewer({ onClose }) {
         elevators.push({ ...ev, x: ev.x + BLDG4_OFFSET.x, z: ev.z + BLDG4_OFFSET.z })
       );
     } else if (currentFloor === '1F') {
-      // 4号館 1F地上連絡ホール（大通り横断歩道から4号館EVへ徒歩で行けるようにする）
+      // 4号館 1F地上エントランス（横断歩道から4号館EVへ徒歩接続）
       zones.push({
         name: '4号館 1Fエントランス',
-        minX: 76,
-        maxX: 120,
+        minX: -132,
+        maxX: -88,
         minZ: 14,
         maxZ: 32,
         floorColor: '#fef3c7',
@@ -1152,13 +1122,13 @@ export default function ThreeCampusViewer({ onClose }) {
       elevators.push({
         id: 'ev-4-1f',
         name: '4号館 EV（2F〜5F）',
-        x: 110,
-        z: 18,
+        x: -113,
+        z: 14,
         targets: ['2F', '3F', '4F', '5F'],
       });
     }
 
-    // 3. 5号館のデータ統合（4号館の北側へ配置）
+    // 3. 5号館のデータ統合（4号館の北側・3号館の西側へ配置）
     if (d5) {
       d5.buildingZones?.forEach((z) =>
         zones.push({
@@ -1182,38 +1152,38 @@ export default function ThreeCampusViewer({ onClose }) {
       );
     }
 
-    // 4. 屋外徒歩ルート・中庭・大通り横断歩道・2F空中歩行者デッキの接続ゾーン
+    // 4. 屋外徒歩ルート・中庭・2号館側大通り横断歩道・2F空中歩行者デッキ
     if (currentFloor === '1F') {
       zones.push(
         // 1F中庭＆屋外大階段ゾーン
         {
           name: '中庭（パティオ）・屋外大階段',
-          minX: -10,
-          maxX: 4,
-          minZ: -14,
+          minX: -12,
+          maxX: 6,
+          minZ: -16,
           maxZ: 26,
           floorColor: '#e7e5e4',
           bldgGroup: null,
           isOutdoor: true,
         },
-        // 1号館・6号館の東側歩道
+        // 2号館西側歩道
         {
-          name: 'キャンパス東側遊歩道',
-          minX: 38,
-          maxX: 47,
+          name: '2号館西側遊歩道',
+          minX: -59,
+          maxX: -40,
           minZ: -20,
           maxZ: 34,
           floorColor: '#e2e8f0',
           bldgGroup: null,
           isOutdoor: true,
         },
-        // 4号館方面への横断歩道（Z=18〜30）
+        // 4号館方面への横断歩道（Z=16〜28）
         {
           name: '大通り横断歩道（4号館方面）',
-          minX: 47,
-          maxX: 76,
-          minZ: 18,
-          maxZ: 30,
+          minX: -88,
+          maxX: -59,
+          minZ: 16,
+          maxZ: 28,
           floorColor: '#cbd5e1',
           bldgGroup: null,
           isOutdoor: true,
@@ -1221,19 +1191,19 @@ export default function ThreeCampusViewer({ onClose }) {
         // 5号館方面への横断歩道（Z=-20〜-8）
         {
           name: '大通り横断歩道（5号館方面）',
-          minX: 47,
-          maxX: 82,
+          minX: -94,
+          maxX: -59,
           minZ: -20,
           maxZ: -8,
           floorColor: '#cbd5e1',
           bldgGroup: null,
           isOutdoor: true,
         },
-        // 東側キャンパス（4号館⇔5号館の連絡遊歩道）
+        // 西側キャンパス（4号館⇔5号館の連絡遊歩道）
         {
-          name: '東側キャンパス遊歩道',
-          minX: 74,
-          maxX: 96,
+          name: '西側キャンパス遊歩道',
+          minX: -108,
+          maxX: -86,
           minZ: -20,
           maxZ: 22,
           floorColor: '#e2e8f0',
@@ -1244,20 +1214,20 @@ export default function ThreeCampusViewer({ onClose }) {
 
       connectors.push(
         { name: '▲ 屋外大階段（2Fデッキへ）', x: -5, z: -3 },
-        { name: '横断歩道で4号館・5号館へ徒歩移動 ▶', x: 42, z: 24 },
-        { name: '◀ 1・2・3・6号館方面', x: 76, z: 24 }
+        { name: '◀ 横断歩道で4号館・5号館へ徒歩移動', x: -46, z: 22 },
+        { name: '1・2・3・6号館方面 ▶', x: -88, z: 22 }
       );
     }
 
     if (currentFloor === '2F') {
       zones.push(
-        // 1号館・6号館2Fから大通りを渡って4号館2Fへ直結する空中歩行者デッキ
+        // 2号館2F エントランスデッキ・正門から大通りを渡って4号館2Fへ直結する空中歩行者デッキ
         {
-          name: '空中歩行者デッキ（4号館連絡）',
-          minX: 38,
-          maxX: 76,
-          minZ: 17,
-          maxZ: 29,
+          name: 'エントランスデッキ・歩行者デッキ（4号館連絡）',
+          minX: -88,
+          maxX: -40,
+          minZ: 15,
+          maxZ: 27,
           floorColor: '#e0f2fe',
           bldgGroup: null,
           isOutdoor: true,
@@ -1265,12 +1235,11 @@ export default function ThreeCampusViewer({ onClose }) {
       );
       connectors.push(
         { name: '▼ 屋外大階段（1F中庭へ下りる）', x: -5, z: -13 },
-        { name: '歩行者デッキで4号館 2Fへ徒歩移動 ▶', x: 42, z: 23 },
-        { name: '◀ 1・2・3・6号館 2Fデッキ', x: 74, z: 23 }
+        { name: '◀ 正門・歩行者デッキで4号館 2Fへ徒歩移動', x: -45, z: 21 },
+        { name: '2号館・1号館方面 ▶', x: -86, z: 21 }
       );
     }
 
-    // 5. 教室を外壁・隣室と密着させ、入り口（ドア開口）を設定
     const connectedRooms = buildConnectedRooms(rawRooms, zones);
 
     return {
@@ -1282,12 +1251,12 @@ export default function ThreeCampusViewer({ onClose }) {
     };
   }, [currentFloor]);
 
-  // 上部エリアボタン（ワンタップでその号館へ移動＋徒歩でも行き来可能）
+  // 上部エリアボタン（ワンタップ移動）
   const handleJumpToBuilding = (group) => {
     setIsMobileFloorOpen(false);
     setNearElevator(null);
     if (group === '1236') {
-      setTeleportTarget({ coords: [0, 40], ts: Date.now() });
+      setTeleportTarget({ coords: [0, 38], ts: Date.now() });
     } else if (group === '4') {
       if (currentFloor === '1F' || parseInt(currentFloor, 10) > 5) {
         setCurrentFloor('2F');
@@ -1297,7 +1266,7 @@ export default function ThreeCampusViewer({ onClose }) {
       if (parseInt(currentFloor, 10) > 7) {
         setCurrentFloor('1F');
       }
-      setTeleportTarget({ coords: [BLDG5_OFFSET.x - 14, BLDG5_OFFSET.z + 10], ts: Date.now() });
+      setTeleportTarget({ coords: [BLDG5_OFFSET.x - 12, BLDG5_OFFSET.z + 8], ts: Date.now() });
     }
   };
 
@@ -1306,22 +1275,23 @@ export default function ThreeCampusViewer({ onClose }) {
     const floorNum = parseInt(currentFloor.replace('F', ''), 10);
     if (floorNum === 1) {
       return [
-        { name: '1号館 エントランス', coords: [0, 40] },
+        { name: '1号館 エントランス', coords: [0, 38] },
         { name: '中庭・屋外大階段前', coords: [-5, 4] },
-        { name: '3号館 学生ホール・食堂', coords: [-2, -26] },
-        { name: '横断歩道（4・5号館へ）', coords: [44, 24] },
-        { name: '4号館 1Fエントランス', coords: [92, 23] },
-        { name: '5号館 1Fホール', coords: [BLDG5_OFFSET.x - 14, BLDG5_OFFSET.z + 10] },
+        { name: '2号館 図書館前', coords: [-26, 20] },
+        { name: '3号館 学生ホール・食堂', coords: [4, -34] },
+        { name: '横断歩道（2号館側→4・5号館）', coords: [-46, 22] },
+        { name: '4号館 1Fエントランス', coords: [-104, 22] },
+        { name: '5号館 1F学生ホール', coords: [BLDG5_OFFSET.x - 12, BLDG5_OFFSET.z + 8] },
       ];
     }
     if (floorNum === 2) {
       return [
         { name: '1号館 2F廊下', coords: [0, 38] },
         { name: 'キャンパスデッキ', coords: [-3, 6] },
-        { name: '空中歩行者デッキ', coords: [56, 23] },
-        { name: '4号館 キャリアセンター', coords: [BLDG4_OFFSET.x + 18, BLDG4_OFFSET.z + 9] },
-        { name: '5号館 2Fホール', coords: [BLDG5_OFFSET.x, BLDG5_OFFSET.z] },
-        { name: '3号館 ロハスカフェ前', coords: [12, -38] },
+        { name: '正門・歩行者デッキ', coords: [-64, 21] },
+        { name: '4号館 学生ホール', coords: [BLDG4_OFFSET.x + 16, BLDG4_OFFSET.z + 8] },
+        { name: '5号館 2Fホール', coords: [BLDG5_OFFSET.x, BLDG5_OFFSET.z - 10] },
+        { name: '3号館 ロハスカフェ前', coords: [14, -42] },
       ];
     }
     if (floorNum <= 5) {
@@ -1330,18 +1300,18 @@ export default function ThreeCampusViewer({ onClose }) {
         { name: `2号館 ${floorNum}F通路`, coords: [-26, 8] },
         { name: `6号館 ${floorNum}Fホール`, coords: [15, 2] },
         { name: `4号館 ${floorNum}F`, coords: [BLDG4_OFFSET.x, BLDG4_OFFSET.z + 4] },
-        { name: `5号館 ${floorNum}F`, coords: [BLDG5_OFFSET.x, BLDG5_OFFSET.z] },
+        { name: `5号館 ${floorNum}F`, coords: [BLDG5_OFFSET.x, BLDG5_OFFSET.z - 10] },
       ];
     }
     if (floorNum <= 7) {
       return [
         { name: `1号館 ${floorNum}F`, coords: [0, 38] },
-        { name: `5号館 ${floorNum}F`, coords: [BLDG5_OFFSET.x, BLDG5_OFFSET.z] },
+        { name: `5号館 ${floorNum}F`, coords: [BLDG5_OFFSET.x, BLDG5_OFFSET.z - 8] },
       ];
     }
     return [
       { name: '1号館 西側エリア', coords: [-28, 38] },
-      { name: '1号館 中央EV前', coords: [-12, 38] },
+      { name: '1号館 中央EV前', coords: [4, 38] },
       { name: '1号館 東側エリア', coords: [25, 38] },
     ];
   };
@@ -1363,7 +1333,7 @@ export default function ThreeCampusViewer({ onClose }) {
 
             <div className="flex items-center gap-1.5 shrink-0">
               <button
-                onClick={() => setTeleportTarget({ coords: [0, 40], ts: Date.now() })}
+                onClick={() => setTeleportTarget({ coords: [0, 38], ts: Date.now() })}
                 className="px-2.5 py-1 bg-slate-800 active:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700"
               >
                 初期位置
@@ -1379,16 +1349,6 @@ export default function ThreeCampusViewer({ onClose }) {
 
           <div className="grid grid-cols-3 gap-1 bg-slate-800 p-1 rounded-xl border border-slate-700">
             <button
-              onClick={() => handleJumpToBuilding('1236')}
-              className={`py-1.5 rounded-lg text-xs font-bold transition text-center ${
-                insideGroup === '1236'
-                  ? 'bg-blue-600 text-white shadow'
-                  : 'text-slate-300 active:bg-slate-700'
-              }`}
-            >
-              1・2・3・6号館
-            </button>
-            <button
               onClick={() => handleJumpToBuilding('4')}
               className={`py-1.5 rounded-lg text-xs font-bold transition text-center ${
                 insideGroup === '4'
@@ -1396,7 +1356,7 @@ export default function ThreeCampusViewer({ onClose }) {
                   : 'text-slate-300 active:bg-slate-700'
               }`}
             >
-              4号館へ移動
+              4号館（西側）
             </button>
             <button
               onClick={() => handleJumpToBuilding('5')}
@@ -1406,7 +1366,17 @@ export default function ThreeCampusViewer({ onClose }) {
                   : 'text-slate-300 active:bg-slate-700'
               }`}
             >
-              5号館へ移動
+              5号館（西側）
+            </button>
+            <button
+              onClick={() => handleJumpToBuilding('1236')}
+              className={`py-1.5 rounded-lg text-xs font-bold transition text-center ${
+                insideGroup === '1236'
+                  ? 'bg-blue-600 text-white shadow'
+                  : 'text-slate-300 active:bg-slate-700'
+              }`}
+            >
+              1・2・3・6号館
             </button>
           </div>
         </div>
@@ -1418,11 +1388,31 @@ export default function ThreeCampusViewer({ onClose }) {
               <span className="text-amber-300">現在地: {currentSubBldg} {currentFloor}</span>
             </h2>
             <p className="text-[11px] text-slate-400">
-              WASDキーで移動 / 入り口から教室入室可 / 屋外大階段・歩行者デッキで全号館へ徒歩移動可
+              WASDキーで移動 / 入り口から教室入室可 / 2号館側の歩行者デッキ・横断歩道で4・5号館へ徒歩移動可
             </p>
           </div>
 
           <div className="flex items-center gap-1.5 bg-slate-800 p-1 rounded-xl border border-slate-700">
+            <button
+              onClick={() => handleJumpToBuilding('4')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                insideGroup === '4'
+                  ? 'bg-blue-600 text-white shadow'
+                  : 'text-slate-300 hover:bg-slate-700'
+              }`}
+            >
+              4号館（西側）
+            </button>
+            <button
+              onClick={() => handleJumpToBuilding('5')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                insideGroup === '5'
+                  ? 'bg-blue-600 text-white shadow'
+                  : 'text-slate-300 hover:bg-slate-700'
+              }`}
+            >
+              5号館（西側）
+            </button>
             <button
               onClick={() => handleJumpToBuilding('1236')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
@@ -1433,31 +1423,11 @@ export default function ThreeCampusViewer({ onClose }) {
             >
               1・2・3・6号館
             </button>
-            <button
-              onClick={() => handleJumpToBuilding('4')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                insideGroup === '4'
-                  ? 'bg-blue-600 text-white shadow'
-                  : 'text-slate-300 hover:bg-slate-700'
-              }`}
-            >
-              4号館
-            </button>
-            <button
-              onClick={() => handleJumpToBuilding('5')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                insideGroup === '5'
-                  ? 'bg-blue-600 text-white shadow'
-                  : 'text-slate-300 hover:bg-slate-700'
-              }`}
-            >
-              5号館
-            </button>
           </div>
 
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setTeleportTarget({ coords: [0, 40], ts: Date.now() })}
+              onClick={() => setTeleportTarget({ coords: [0, 38], ts: Date.now() })}
               className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-lg border border-slate-700"
             >
               初期位置へ
@@ -1485,13 +1455,13 @@ export default function ThreeCampusViewer({ onClose }) {
             castShadow
             shadow-mapSize-width={2048}
             shadow-mapSize-height={2048}
-            shadow-camera-left={-80}
-            shadow-camera-right={130}
+            shadow-camera-left={-150}
+            shadow-camera-right={80}
             shadow-camera-top={80}
             shadow-camera-bottom={-80}
           />
 
-          {/* キャンパス外観・中庭・屋外大階段・大通り・歩行者デッキ（建物内では外壁が自動消去） */}
+          {/* キャンパス外観・中庭・屋外大階段・2号館側大通り・歩行者デッキ（建物内では外壁が自動消去） */}
           <CampusScenery currentFloor={currentFloor} insideGroup={insideGroup} />
 
           {/* 床ゾーン群 */}
