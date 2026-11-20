@@ -5,8 +5,8 @@ import * as THREE from 'three';
 import { CAMPUS_3D_BUILDINGS } from '../data/campus3dData';
 
 // 4号館・5号館のワールド座標オフセット（2号館側＝西側の大通り向こうに配置）
-const BLDG4_OFFSET = { x: -116, z: 18 };
-const BLDG5_OFFSET = { x: -116, z: -26 };
+const BLDG4_OFFSET = { x: -116, z: 22 };
+const BLDG5_OFFSET = { x: -116, z: -20 };
 
 // スマホ用 360度バーチャルスティック
 function VirtualJoystick({ joystickRef }) {
@@ -278,8 +278,7 @@ function BrickArchFacade({ position, rotation = [0, 0, 0], count = 4, width = 3.
   );
 }
 
-// キャンパス外観・中庭・屋外大階段・2号館側大通り・4号館＆5号館シルエット
-// ※プレイヤーが建物の中に入ると、その建物の外壁は自動で非表示になる！
+// キャンパス外観・中庭・屋外階段B・正門デッキ下ピロティ通り道・大通り・4号館＆5号館
 function CampusScenery({ currentFloor, insideGroup }) {
   const floorNum = parseInt(currentFloor.replace('F', ''), 10) || 1;
   const groundY = -(floorNum - 1) * 3.4;
@@ -302,36 +301,67 @@ function CampusScenery({ currentFloor, insideGroup }) {
         <meshStandardMaterial color="#d6d3d1" roughness={0.85} />
       </mesh>
 
-      {/* 西側キャンパス（4・5号館）敷地舗装（2号館側・大通りの向こう） */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-116, groundY - 0.1, -4]} receiveShadow>
+      {/* 西側キャンパス（4・5号館）敷地舗装 */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-116, groundY - 0.1, 0]} receiveShadow>
         <planeGeometry args={[68, 108]} />
         <meshStandardMaterial color="#d6d3d1" roughness={0.85} />
       </mesh>
 
       {/* =================================================================== */}
-      {/* 1. 中庭（パティオ）のレンガ舗装遊歩道＆屋外大階段                    */}
+      {/* 1. 中庭（パティオ）のレンガ舗装遊歩道＆屋外階段B・ピロティ通り道       */}
       {/* =================================================================== */}
+      {/* 中庭中央の赤茶色レンガタイル遊歩道 */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-3, groundY - 0.03, 7]} receiveShadow>
         <planeGeometry args={[8.5, 38]} />
         <meshStandardMaterial color="#9a3412" roughness={0.85} />
       </mesh>
 
-      {/* 中庭奥の屋外大階段（X=-9〜-1, Z=-14〜-2） */}
-      <group position={[-5, groundY, -2]}>
+      {/* 屋外階段Bの西側から5号館方面へ抜けるピロティ通り道（白タイル＋レンガ帯） */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-26, groundY - 0.02, -19]} receiveShadow>
+        <planeGeometry args={[48, 14]} />
+        <meshStandardMaterial color="#f5f5f4" roughness={0.75} />
+      </mesh>
+
+      {/* 2F正門エントランスデッキを支える白い円柱ピロティ（1F通り道の上部構造） */}
+      <group position={[-22, groundY, -19]}>
+        {/* 2Fデッキ床スラブ */}
+        <mesh position={[0, 3.4, 0]} castShadow receiveShadow>
+          <boxGeometry args={[38, 0.45, 16]} />
+          <meshStandardMaterial color="#e7e5e4" />
+        </mesh>
+        {/* ピロティの白い丸柱 */}
+        {[-15, -5, 5, 14].map((px, idx) => (
+          <React.Fragment key={`piloti-${idx}`}>
+            <mesh position={[px, 1.7, -5.5]} castShadow>
+              <cylinderGeometry args={[0.32, 0.32, 3.4, 16]} />
+              <meshStandardMaterial color="#f8fafc" />
+            </mesh>
+            <mesh position={[px, 1.7, 5.5]} castShadow>
+              <cylinderGeometry args={[0.32, 0.32, 3.4, 16]} />
+              <meshStandardMaterial color="#f8fafc" />
+            </mesh>
+          </React.Fragment>
+        ))}
+      </group>
+
+      {/* 屋外階段B（X=-10〜-2, Z=-14〜-2：右側に階段、左側にピロティ通り道） */}
+      <group position={[-6, groundY, -2]}>
         {Array.from({ length: 14 }).map((_, i) => {
           const stepY = (i + 0.5) * (3.4 / 14);
           const stepZ = -(i + 0.5) * (12 / 14);
           return (
             <mesh key={`stair-${i}`} position={[0, stepY, stepZ]} castShadow receiveShadow>
-              <boxGeometry args={[7.8, 3.4 / 14, 12 / 14 + 0.15]} />
+              <boxGeometry args={[7.6, 3.4 / 14, 12 / 14 + 0.15]} />
               <meshStandardMaterial color={i % 2 === 0 ? '#e7e5e4' : '#d6d3d1'} roughness={0.7} />
             </mesh>
           );
         })}
-        <mesh position={[-4.0, 2.0, -6]} rotation={[0.275, 0, 0]}>
-          <boxGeometry args={[0.35, 1.1, 12.6]} />
+        {/* 西側コンクリート擁壁（階段とピロティ通り道の境界壁） */}
+        <mesh position={[-4.0, 1.8, -6]} castShadow>
+          <boxGeometry args={[0.45, 3.6, 12.2]} />
           <meshStandardMaterial color="#a8a29e" />
         </mesh>
+        {/* 東側手すり壁（学友会室側） */}
         <mesh position={[4.0, 2.0, -6]} rotation={[0.275, 0, 0]}>
           <boxGeometry args={[0.35, 1.1, 12.6]} />
           <meshStandardMaterial color="#a8a29e" />
@@ -339,7 +369,7 @@ function CampusScenery({ currentFloor, insideGroup }) {
       </group>
 
       {/* 中庭の並木道＆ベンチ */}
-      {[-6, 1, 8, 15, 21].map((zPos, i) => (
+      {[-5, 2, 9, 16, 22].map((zPos, i) => (
         <React.Fragment key={`patio-tree-${i}`}>
           <CampusTree
             position={[-8.6, groundY, zPos]}
@@ -353,7 +383,7 @@ function CampusScenery({ currentFloor, insideGroup }) {
           />
         </React.Fragment>
       ))}
-      {[-2, 11, 19].map((zPos, idx) => (
+      {[-1, 12, 20].map((zPos, idx) => (
         <group key={`bench-${idx}`} position={[-3, groundY, zPos]}>
           <mesh position={[-3.2, 0.25, 0]}>
             <boxGeometry args={[1.4, 0.5, 0.7]} />
@@ -415,9 +445,9 @@ function CampusScenery({ currentFloor, insideGroup }) {
             height={6.2}
           />
 
-          {/* 屋外大階段の右隣の2連レンガアーチファサード */}
-          <BrickArchFacade position={[7.5, groundY, -14]} count={3} width={3.6} height={6.2} />
-          <mesh position={[7.5, groundY + 8.6, -14]}>
+          {/* 屋外階段Bの東側（3号館〜6号館接続部 Z=-17）のレンガアーチファサード */}
+          <BrickArchFacade position={[7.5, groundY, -17]} count={3} width={3.6} height={6.2} />
+          <mesh position={[7.5, groundY + 8.6, -17]}>
             <boxGeometry args={[11, 4.5, 0.5]} />
             <meshStandardMaterial color="#f5f5f4" />
           </mesh>
@@ -459,7 +489,7 @@ function CampusScenery({ currentFloor, insideGroup }) {
         </mesh>
         {/* 中央分離帯（横断歩道部分は途切れさせる） */}
         <mesh position={[0, 0.15, -75]}>
-          <boxGeometry args={[1.4, 0.3, 100]} />
+          <boxGeometry args={[1.4, 0.3, 96]} />
           <meshStandardMaterial color="#15803d" />
         </mesh>
         <mesh position={[0, 0.15, 85]}>
@@ -475,16 +505,16 @@ function CampusScenery({ currentFloor, insideGroup }) {
           </mesh>
         ))}
 
-        {/* 1F地上徒歩ルート：5号館方面 横断歩道（Z=-14） */}
-        {[-4, -1.5, 1, 3.5].map((zOff, i) => (
-          <mesh key={`cw2-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, -14 + zOff]}>
+        {/* 1F地上徒歩ルート：ピロティ通り道から5号館正面への横断歩道（Z=-19） */}
+        {[-5, -2.5, 0, 2.5, 5].map((zOff, i) => (
+          <mesh key={`cw2-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, -19 + zOff]}>
             <planeGeometry args={[16, 1.2]} />
             <meshBasicMaterial color="#f8fafc" />
           </mesh>
         ))}
 
         {/* 道路沿いの街路樹 */}
-        {[-65, -45, -28, 4, 42, 62].map((z, idx) => (
+        {[-65, -45, -32, 4, 42, 62].map((z, idx) => (
           <React.Fragment key={`road-tree-${idx}`}>
             <CampusTree position={[-10.5, 0, z]} scale={1.15} leafColor="#3f6212" />
             <CampusTree position={[10.5, 0, z]} scale={1.15} leafColor="#4d7c0f" />
@@ -513,7 +543,6 @@ function CampusScenery({ currentFloor, insideGroup }) {
       {/* =================================================================== */}
       {show4Walls && (
         <group position={[BLDG4_OFFSET.x, groundY, BLDG4_OFFSET.z]}>
-          {/* 4号館 南側外壁（5階建て） */}
           <mesh position={[0, 8.5, 18.2]} castShadow>
             <boxGeometry args={[56, 17, 0.6]} />
             <meshStandardMaterial color="#f5f5f4" />
@@ -522,7 +551,6 @@ function CampusScenery({ currentFloor, insideGroup }) {
             <boxGeometry args={[56.2, 6.0, 0.65]} />
             <meshStandardMaterial color="#9a3412" />
           </mesh>
-          {/* 4号館 西側外壁 */}
           <mesh position={[-28.2, 8.5, 1]} castShadow>
             <boxGeometry args={[0.6, 17, 34]} />
             <meshStandardMaterial color="#f5f5f4" />
@@ -535,7 +563,7 @@ function CampusScenery({ currentFloor, insideGroup }) {
       )}
 
       {/* =================================================================== */}
-      {/* 5. 5号館の外観（屋外にいるときのみ表示・5号館に入ると自動で消える）      */}
+      {/* 5. 5号館の外観（ストリートビュー写真準拠の白い縦ルーバー外観）         */}
       {/* =================================================================== */}
       {show5Walls && (
         <group position={[BLDG5_OFFSET.x, groundY, BLDG5_OFFSET.z]}>
@@ -548,14 +576,17 @@ function CampusScenery({ currentFloor, insideGroup }) {
             <boxGeometry args={[0.6, 24, 44]} />
             <meshStandardMaterial color="#f5f5f4" />
           </mesh>
-          <mesh position={[0, 3.0, -22.3]}>
-            <boxGeometry args={[44.2, 6.0, 0.65]} />
-            <meshStandardMaterial color="#9a3412" />
-          </mesh>
+          {/* 東側（大通り面）の縦ルーバーフィン（写真3準拠） */}
+          {[-14, -8, -2, 4, 10, 16].map((zOff, i) => (
+            <mesh key={`fin-${i}`} position={[22.3, 13.5, zOff]} castShadow>
+              <boxGeometry args={[0.9, 19, 0.35]} />
+              <meshStandardMaterial color="#f8fafc" />
+            </mesh>
+          ))}
         </group>
       )}
 
-      {/* 周囲の公園・緑地（3号館北側・6号館東側水の科学館方面） */}
+      {/* 周囲の公園・緑地 */}
       {[-25, -10, 5, 20, 32].map((x, i) => (
         <CampusTree key={`park-n-${i}`} position={[x, groundY, -72 - (i % 2) * 7]} scale={1.3} leafColor="#15803d" />
       ))}
@@ -934,20 +965,20 @@ function PlayerController({
       }
     }
 
-    // 1F中庭の屋外大階段での高さ追従＆1F⇔2F自動切替
+    // 1F中庭の屋外階段B（X: -10〜-2, Z: -14〜-2）での高さ追従＆1F⇔2F正門デッキ自動切替
     let playerY = 0;
     const px = posRef.current.x;
     const pz = posRef.current.z;
 
-    if (currentFloor === '1F' && px >= -9 && px <= -1 && pz <= -2 && pz >= -14) {
+    if (currentFloor === '1F' && px >= -10 && px <= -2 && pz <= -2 && pz >= -14) {
       const progress = (-2 - pz) / 12;
       playerY = progress * 3.4;
       if (pz <= -13.4 && stairCooldownRef.current <= 0) {
         stairCooldownRef.current = 1.0;
-        posRef.current.z = -15.2;
+        posRef.current.z = -15.5;
         onFloorAutoSwitch('2F');
       }
-    } else if (currentFloor === '2F' && px >= -9 && px <= -1 && pz >= -14 && pz <= -11.5 && stairCooldownRef.current <= 0) {
+    } else if (currentFloor === '2F' && px >= -10 && px <= -2 && pz >= -14 && pz <= -11.5 && stairCooldownRef.current <= 0) {
       stairCooldownRef.current = 1.0;
       posRef.current.z = -11.5;
       onFloorAutoSwitch('1F');
@@ -1025,30 +1056,197 @@ export default function ThreeCampusViewer({ onClose }) {
 
   const [isMobile, setIsMobile] = useState(false);
   const [isPortrait, setIsPortrait] = useState(false);
-  const [isMobileFloorOpen, setIsMobileFloorOpen] = useState(false);
+  const [showFloorMenu, setShowFloorMenu] = useState(false);
 
   const keysPressed = useRef({});
   const joystickInput = useRef({ x: 0, y: 0 });
-
-  const allFloors = ['1F', '2F', '3F', '4F', '5F', '6F', '7F', '8F', '9F', '10F', '11F', '12F', '13F'];
 
   useEffect(() => {
     const checkViewport = () => {
       const w = window.innerWidth;
       const h = window.innerHeight;
-      const isTouch = window.matchMedia('(pointer: coarse)').matches;
-      setIsMobile(isTouch || w < 768);
+      setIsMobile(w < 768 || 'ontouchstart' in window);
       setIsPortrait(h > w);
     };
-
     checkViewport();
     window.addEventListener('resize', checkViewport);
-    window.addEventListener('orientationchange', checkViewport);
-    return () => {
-      window.removeEventListener('resize', checkViewport);
-      window.removeEventListener('orientationchange', checkViewport);
-    };
+    return () => window.removeEventListener('resize', checkViewport);
   }, []);
+
+  const allFloors = ['1F', '2F', '3F', '4F', '5F', '6F', '7F', '8F', '9F', '10F', '11F', '12F', '13F'];
+
+  // 1・2・3・6号館、中庭・ピロティ通り道・大通り、4号館、5号館を1つの連続空間に統合
+  const unifiedFloorData = useMemo(() => {
+    const f1236 = CAMPUS_3D_BUILDINGS['area-1236']?.floors?.[currentFloor];
+    const f4 = CAMPUS_3D_BUILDINGS['area-4']?.floors?.[currentFloor];
+    const f5 = CAMPUS_3D_BUILDINGS['area-5']?.floors?.[currentFloor];
+
+    const buildingZones = [];
+    const rawRooms = [];
+    const elevators = [];
+    const connectors = [];
+    const voids = [];
+
+    if (f1236) {
+      f1236.buildingZones?.forEach((z) => buildingZones.push({ ...z, bldgGroup: '1236' }));
+      f1236.rooms?.forEach((r) => rawRooms.push({ ...r, bldgGroup: '1236' }));
+      f1236.elevators?.forEach((e) => elevators.push({ ...e }));
+      f1236.connectors?.forEach((c) => connectors.push({ ...c }));
+      f1236.voids?.forEach((v) => voids.push({ ...v }));
+    }
+
+    // 1F：屋外中庭 ＋ 屋外階段Bの西側ピロティ通り道（モニュメント門・横断歩道・5号館＆4号館へ直通）
+    if (currentFloor === '1F') {
+      buildingZones.push({
+        name: '中庭（パティオ）・屋外階段B',
+        minX: -12,
+        maxX: 6,
+        minZ: -14,
+        maxZ: 26,
+        floorColor: '#e7e5e4',
+        isOutdoor: true,
+      });
+      // 屋外階段Bの右側（西側）から2号館の北側を通り抜けるピロティ通り道
+      buildingZones.push({
+        name: '正門デッキ下ピロティ通り道（5号館・4号館方面）',
+        minX: -62,
+        maxX: -10,
+        minZ: -28,
+        maxZ: -10,
+        floorColor: '#f5f5f4',
+        isOutdoor: true,
+      });
+      // 大通り横断歩道（5号館正面入口へ直結：Z = -26〜-12）
+      buildingZones.push({
+        name: '大通り横断歩道（5号館正面ルート）',
+        minX: -94,
+        maxX: -62,
+        minZ: -26,
+        maxZ: -12,
+        floorColor: '#475569',
+        isOutdoor: true,
+      });
+      // 西側歩道（4号館・5号館を結ぶプロムナード：X = -94〜-78, Z = -36〜36）
+      buildingZones.push({
+        name: '西側プロムナード（4号館・5号館前）',
+        minX: -94,
+        maxX: -78,
+        minZ: -36,
+        maxZ: 36,
+        floorColor: '#d6d3d1',
+        isOutdoor: true,
+      });
+      // 大通り横断歩道（4号館方面：Z = 14〜30）
+      buildingZones.push({
+        name: '大通り横断歩道（4号館ルート）',
+        minX: -78,
+        maxX: -40,
+        minZ: 14,
+        maxZ: 30,
+        floorColor: '#475569',
+        isOutdoor: true,
+      });
+
+      connectors.push(
+        { name: '屋外階段B（2F正門デッキへ）', x: -6, z: -4 },
+        { name: 'ピロティ通り道（5号館方面へ）', x: -24, z: -19 },
+        { name: '横断歩道（5号館正面）', x: -72, z: -19 }
+      );
+    }
+
+    // 2F：正門エントランスデッキから大通りをまたぐ空中歩行者デッキ（4号館 2Fへ直結）
+    if (currentFloor === '2F') {
+      buildingZones.push({
+        name: '空中歩行者デッキ（正門デッキ ⇔ 4号館）',
+        minX: -88,
+        maxX: -40,
+        minZ: 15,
+        maxZ: 27,
+        floorColor: '#cbd5e1',
+        isOutdoor: true,
+      });
+      connectors.push({
+        name: '空中歩行者デッキ（4号館 2F直結）',
+        x: -64,
+        z: 21,
+      });
+    }
+
+    // 4号館
+    if (f4) {
+      f4.buildingZones?.forEach((z) =>
+        buildingZones.push({
+          ...z,
+          minX: z.minX + BLDG4_OFFSET.x,
+          maxX: z.maxX + BLDG4_OFFSET.x,
+          minZ: z.minZ + BLDG4_OFFSET.z,
+          maxZ: z.maxZ + BLDG4_OFFSET.z,
+          bldgGroup: '4',
+        })
+      );
+      f4.rooms?.forEach((r) =>
+        rawRooms.push({
+          ...r,
+          x: r.x + BLDG4_OFFSET.x,
+          z: r.z + BLDG4_OFFSET.z,
+          bldgGroup: '4',
+        })
+      );
+      f4.elevators?.forEach((e) =>
+        elevators.push({
+          ...e,
+          x: e.x + BLDG4_OFFSET.x,
+          z: e.z + BLDG4_OFFSET.z,
+        })
+      );
+    }
+
+    // 5号館
+    if (f5) {
+      f5.buildingZones?.forEach((z) =>
+        buildingZones.push({
+          ...z,
+          minX: z.minX + BLDG5_OFFSET.x,
+          maxX: z.maxX + BLDG5_OFFSET.x,
+          minZ: z.minZ + BLDG5_OFFSET.z,
+          maxZ: z.maxZ + BLDG5_OFFSET.z,
+          bldgGroup: '5',
+        })
+      );
+      f5.rooms?.forEach((r) =>
+        rawRooms.push({
+          ...r,
+          x: r.x + BLDG5_OFFSET.x,
+          z: r.z + BLDG5_OFFSET.z,
+          bldgGroup: '5',
+        })
+      );
+      f5.elevators?.forEach((e) =>
+        elevators.push({
+          ...e,
+          x: e.x + BLDG5_OFFSET.x,
+          z: e.z + BLDG5_OFFSET.z,
+        })
+      );
+      f5.voids?.forEach((v) =>
+        voids.push({
+          ...v,
+          x: v.x + BLDG5_OFFSET.x,
+          z: v.z + BLDG5_OFFSET.z,
+        })
+      );
+    }
+
+    const connectedRooms = buildConnectedRooms(rawRooms, buildingZones);
+
+    return {
+      buildingZones,
+      rooms: connectedRooms,
+      elevators,
+      connectors,
+      voids,
+    };
+  }, [currentFloor]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -1065,557 +1263,240 @@ export default function ThreeCampusViewer({ onClose }) {
     };
   }, []);
 
-  // 全号館（1・2・3・6号館 ＋ 2号館側の4号館・5号館 ＋ 屋外通路・歩行者デッキ）を1つの空間に統合
-  const unifiedFloorData = useMemo(() => {
-    const d1236 = CAMPUS_3D_BUILDINGS['area-1236'].floors[currentFloor];
-    const d4 = CAMPUS_3D_BUILDINGS['area-4'].floors[currentFloor];
-    const d5 = CAMPUS_3D_BUILDINGS['area-5'].floors[currentFloor];
-
-    const zones = [];
-    const rawRooms = [];
-    const voids = [];
-    const connectors = [];
-    const elevators = [];
-
-    // 1. 1・2・3・6号館のデータ統合
-    if (d1236) {
-      d1236.buildingZones?.forEach((z) => {
-        zones.push({ ...z, bldgGroup: '1236', isOutdoor: z.name === 'キャンパスデッキ' });
-      });
-      d1236.rooms?.forEach((r) => rawRooms.push({ ...r }));
-      d1236.voids?.forEach((v) => voids.push({ ...v }));
-      d1236.connectors?.forEach((c) => connectors.push({ ...c }));
-      d1236.elevators?.forEach((ev) => elevators.push({ ...ev }));
-    }
-
-    // 2. 4号館のデータ統合（2号館側＝西側へ配置）
-    if (d4) {
-      d4.buildingZones?.forEach((z) =>
-        zones.push({
-          ...z,
-          minX: z.minX + BLDG4_OFFSET.x,
-          maxX: z.maxX + BLDG4_OFFSET.x,
-          minZ: z.minZ + BLDG4_OFFSET.z,
-          maxZ: z.maxZ + BLDG4_OFFSET.z,
-          bldgGroup: '4',
-          isOutdoor: false,
-        })
-      );
-      d4.rooms?.forEach((r) =>
-        rawRooms.push({ ...r, x: r.x + BLDG4_OFFSET.x, z: r.z + BLDG4_OFFSET.z })
-      );
-      d4.elevators?.forEach((ev) =>
-        elevators.push({ ...ev, x: ev.x + BLDG4_OFFSET.x, z: ev.z + BLDG4_OFFSET.z })
-      );
-    } else if (currentFloor === '1F') {
-      // 4号館 1F地上エントランス（横断歩道から4号館EVへ徒歩接続）
-      zones.push({
-        name: '4号館 1Fエントランス',
-        minX: -132,
-        maxX: -88,
-        minZ: 14,
-        maxZ: 32,
-        floorColor: '#fef3c7',
-        bldgGroup: '4',
-        isOutdoor: false,
-      });
-      elevators.push({
-        id: 'ev-4-1f',
-        name: '4号館 EV（2F〜5F）',
-        x: -113,
-        z: 14,
-        targets: ['2F', '3F', '4F', '5F'],
-      });
-    }
-
-    // 3. 5号館のデータ統合（4号館の北側・3号館の西側へ配置）
-    if (d5) {
-      d5.buildingZones?.forEach((z) =>
-        zones.push({
-          ...z,
-          minX: z.minX + BLDG5_OFFSET.x,
-          maxX: z.maxX + BLDG5_OFFSET.x,
-          minZ: z.minZ + BLDG5_OFFSET.z,
-          maxZ: z.maxZ + BLDG5_OFFSET.z,
-          bldgGroup: '5',
-          isOutdoor: false,
-        })
-      );
-      d5.rooms?.forEach((r) =>
-        rawRooms.push({ ...r, x: r.x + BLDG5_OFFSET.x, z: r.z + BLDG5_OFFSET.z })
-      );
-      d5.voids?.forEach((v) =>
-        voids.push({ ...v, x: v.x + BLDG5_OFFSET.x, z: v.z + BLDG5_OFFSET.z })
-      );
-      d5.elevators?.forEach((ev) =>
-        elevators.push({ ...ev, x: ev.x + BLDG5_OFFSET.x, z: ev.z + BLDG5_OFFSET.z })
-      );
-    }
-
-    // 4. 屋外徒歩ルート・中庭・2号館側大通り横断歩道・2F空中歩行者デッキ
-    if (currentFloor === '1F') {
-      zones.push(
-        // 1F中庭＆屋外大階段ゾーン
-        {
-          name: '中庭（パティオ）・屋外大階段',
-          minX: -12,
-          maxX: 6,
-          minZ: -16,
-          maxZ: 26,
-          floorColor: '#e7e5e4',
-          bldgGroup: null,
-          isOutdoor: true,
-        },
-        // 2号館西側歩道
-        {
-          name: '2号館西側遊歩道',
-          minX: -59,
-          maxX: -40,
-          minZ: -20,
-          maxZ: 34,
-          floorColor: '#e2e8f0',
-          bldgGroup: null,
-          isOutdoor: true,
-        },
-        // 4号館方面への横断歩道（Z=16〜28）
-        {
-          name: '大通り横断歩道（4号館方面）',
-          minX: -88,
-          maxX: -59,
-          minZ: 16,
-          maxZ: 28,
-          floorColor: '#cbd5e1',
-          bldgGroup: null,
-          isOutdoor: true,
-        },
-        // 5号館方面への横断歩道（Z=-20〜-8）
-        {
-          name: '大通り横断歩道（5号館方面）',
-          minX: -94,
-          maxX: -59,
-          minZ: -20,
-          maxZ: -8,
-          floorColor: '#cbd5e1',
-          bldgGroup: null,
-          isOutdoor: true,
-        },
-        // 西側キャンパス（4号館⇔5号館の連絡遊歩道）
-        {
-          name: '西側キャンパス遊歩道',
-          minX: -108,
-          maxX: -86,
-          minZ: -20,
-          maxZ: 22,
-          floorColor: '#e2e8f0',
-          bldgGroup: null,
-          isOutdoor: true,
-        }
-      );
-
-      connectors.push(
-        { name: '▲ 屋外大階段（2Fデッキへ）', x: -5, z: -3 },
-        { name: '◀ 横断歩道で4号館・5号館へ徒歩移動', x: -46, z: 22 },
-        { name: '1・2・3・6号館方面 ▶', x: -88, z: 22 }
-      );
-    }
-
-    if (currentFloor === '2F') {
-      zones.push(
-        // 2号館2F エントランスデッキ・正門から大通りを渡って4号館2Fへ直結する空中歩行者デッキ
-        {
-          name: 'エントランスデッキ・歩行者デッキ（4号館連絡）',
-          minX: -88,
-          maxX: -40,
-          minZ: 15,
-          maxZ: 27,
-          floorColor: '#e0f2fe',
-          bldgGroup: null,
-          isOutdoor: true,
-        }
-      );
-      connectors.push(
-        { name: '▼ 屋外大階段（1F中庭へ下りる）', x: -5, z: -13 },
-        { name: '◀ 正門・歩行者デッキで4号館 2Fへ徒歩移動', x: -45, z: 21 },
-        { name: '2号館・1号館方面 ▶', x: -86, z: 21 }
-      );
-    }
-
-    const connectedRooms = buildConnectedRooms(rawRooms, zones);
-
-    return {
-      buildingZones: zones,
-      rooms: connectedRooms,
-      voids,
-      connectors,
-      elevators,
-    };
-  }, [currentFloor]);
-
-  // 上部エリアボタン（ワンタップ移動）
-  const handleJumpToBuilding = (group) => {
-    setIsMobileFloorOpen(false);
+  const handleSelectFloor = (targetFloor) => {
+    setCurrentFloor(targetFloor);
     setNearElevator(null);
-    if (group === '1236') {
-      setTeleportTarget({ coords: [0, 38], ts: Date.now() });
-    } else if (group === '4') {
-      if (currentFloor === '1F' || parseInt(currentFloor, 10) > 5) {
-        setCurrentFloor('2F');
-      }
-      setTeleportTarget({ coords: [BLDG4_OFFSET.x + 16, BLDG4_OFFSET.z + 8], ts: Date.now() });
-    } else if (group === '5') {
-      if (parseInt(currentFloor, 10) > 7) {
-        setCurrentFloor('1F');
-      }
-      setTeleportTarget({ coords: [BLDG5_OFFSET.x - 12, BLDG5_OFFSET.z + 8], ts: Date.now() });
-    }
+    setShowFloorMenu(false);
   };
 
-  // フロアごとのクイック移動スポット
-  const getQuickSpots = () => {
-    const floorNum = parseInt(currentFloor.replace('F', ''), 10);
-    if (floorNum === 1) {
-      return [
-        { name: '1号館 エントランス', coords: [0, 38] },
-        { name: '中庭・屋外大階段前', coords: [-5, 4] },
-        { name: '2号館 図書館前', coords: [-26, 20] },
-        { name: '3号館 学生ホール・食堂', coords: [4, -34] },
-        { name: '横断歩道（2号館側→4・5号館）', coords: [-46, 22] },
-        { name: '4号館 1Fエントランス', coords: [-104, 22] },
-        { name: '5号館 1F学生ホール', coords: [BLDG5_OFFSET.x - 12, BLDG5_OFFSET.z + 8] },
-      ];
+  // クイック移動（ワープ）：クリックした館・エリアへ瞬時に移動
+  const handleQuickJump = (area) => {
+    if (area === '1-2-3-6') {
+      setTeleportTarget({ coords: [0, 38], ts: Date.now() });
+    } else if (area === 'patio') {
+      setCurrentFloor('1F');
+      setTeleportTarget({ coords: [-6, -2], ts: Date.now() });
+    } else if (area === '4') {
+      const targetFl = ['2F', '3F', '4F', '5F'].includes(currentFloor) ? currentFloor : '2F';
+      setCurrentFloor(targetFl);
+      setTeleportTarget({ coords: [BLDG4_OFFSET.x + 16, BLDG4_OFFSET.z + 8], ts: Date.now() });
+    } else if (area === '5') {
+      const targetFl = ['1F', '2F', '3F', '4F', '5F', '6F', '7F'].includes(currentFloor) ? currentFloor : '1F';
+      setCurrentFloor(targetFl);
+      setTeleportTarget({ coords: [BLDG5_OFFSET.x + 12, BLDG5_OFFSET.z + 8], ts: Date.now() });
     }
-    if (floorNum === 2) {
-      return [
-        { name: '1号館 2F廊下', coords: [0, 38] },
-        { name: 'キャンパスデッキ', coords: [-3, 6] },
-        { name: '正門・歩行者デッキ', coords: [-64, 21] },
-        { name: '4号館 学生ホール', coords: [BLDG4_OFFSET.x + 16, BLDG4_OFFSET.z + 8] },
-        { name: '5号館 2Fホール', coords: [BLDG5_OFFSET.x, BLDG5_OFFSET.z - 10] },
-        { name: '3号館 ロハスカフェ前', coords: [14, -42] },
-      ];
-    }
-    if (floorNum <= 5) {
-      return [
-        { name: `1号館 ${floorNum}F廊下`, coords: [0, 38] },
-        { name: `2号館 ${floorNum}F通路`, coords: [-26, 8] },
-        { name: `6号館 ${floorNum}Fホール`, coords: [15, 2] },
-        { name: `4号館 ${floorNum}F`, coords: [BLDG4_OFFSET.x, BLDG4_OFFSET.z + 4] },
-        { name: `5号館 ${floorNum}F`, coords: [BLDG5_OFFSET.x, BLDG5_OFFSET.z - 10] },
-      ];
-    }
-    if (floorNum <= 7) {
-      return [
-        { name: `1号館 ${floorNum}F`, coords: [0, 38] },
-        { name: `5号館 ${floorNum}F`, coords: [BLDG5_OFFSET.x, BLDG5_OFFSET.z - 8] },
-      ];
-    }
-    return [
-      { name: '1号館 西側エリア', coords: [-28, 38] },
-      { name: '1号館 中央EV前', coords: [4, 38] },
-      { name: '1号館 東側エリア', coords: [25, 38] },
-    ];
   };
 
   return (
-    <div className="fixed inset-0 bg-sky-200 z-50 flex flex-col font-sans select-none overflow-hidden touch-none">
-      {/* 上部ナビゲーションバー */}
-      {isMobile ? (
-        <div className="bg-slate-900/95 border-b border-slate-800 px-3 py-2 flex flex-col gap-2 text-white z-20">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1.5 min-w-0">
-              <span className="bg-blue-600 text-[11px] px-2 py-0.5 rounded font-bold shrink-0">
-                3D
-              </span>
-              <span className="text-amber-300 font-bold text-sm truncate">
-                {currentSubBldg} {currentFloor}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-1.5 shrink-0">
-              <button
-                onClick={() => setTeleportTarget({ coords: [0, 38], ts: Date.now() })}
-                className="px-2.5 py-1 bg-slate-800 active:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700"
-              >
-                初期位置
-              </button>
-              <button
-                onClick={onClose}
-                className="px-2.5 py-1 bg-rose-600 active:bg-rose-700 text-white text-xs font-bold rounded-lg"
-              >
-                2Dへ戻る ✕
-              </button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-1 bg-slate-800 p-1 rounded-xl border border-slate-700">
-            <button
-              onClick={() => handleJumpToBuilding('4')}
-              className={`py-1.5 rounded-lg text-xs font-bold transition text-center ${
-                insideGroup === '4'
-                  ? 'bg-blue-600 text-white shadow'
-                  : 'text-slate-300 active:bg-slate-700'
-              }`}
-            >
-              4号館（西側）
-            </button>
-            <button
-              onClick={() => handleJumpToBuilding('5')}
-              className={`py-1.5 rounded-lg text-xs font-bold transition text-center ${
-                insideGroup === '5'
-                  ? 'bg-blue-600 text-white shadow'
-                  : 'text-slate-300 active:bg-slate-700'
-              }`}
-            >
-              5号館（西側）
-            </button>
-            <button
-              onClick={() => handleJumpToBuilding('1236')}
-              className={`py-1.5 rounded-lg text-xs font-bold transition text-center ${
-                insideGroup === '1236'
-                  ? 'bg-blue-600 text-white shadow'
-                  : 'text-slate-300 active:bg-slate-700'
-              }`}
-            >
-              1・2・3・6号館
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="px-4 py-3 bg-slate-900/95 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 text-white z-20">
-          <div>
-            <h2 className="text-base md:text-lg font-bold flex items-center gap-2">
-              <span className="bg-blue-600 text-xs px-2 py-0.5 rounded">3Dウォーク</span>
-              <span className="text-amber-300">現在地: {currentSubBldg} {currentFloor}</span>
+    <div className="fixed inset-0 z-50 bg-sky-200 flex flex-col select-none overflow-hidden">
+      {/* トップバー */}
+      <div className="bg-slate-900/95 backdrop-blur-md text-white px-3 py-2 flex items-center justify-between border-b border-slate-700 z-10 gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="bg-blue-600 text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full shrink-0">
+            3D
+          </span>
+          <div className="truncate">
+            <h2 className="font-bold text-xs sm:text-sm truncate">
+              有明キャンパス 全館シームレス探索
             </h2>
-            <p className="text-[11px] text-slate-400">
-              WASDキーで移動 / 入り口から教室入室可 / 2号館側の歩行者デッキ・横断歩道で4・5号館へ徒歩移動可
+            <p className="text-[10px] sm:text-xs text-emerald-300 font-semibold truncate">
+              現在地：{currentSubBldg} / {currentFloor}
             </p>
           </div>
+        </div>
 
-          <div className="flex items-center gap-1.5 bg-slate-800 p-1 rounded-xl border border-slate-700">
-            <button
-              onClick={() => handleJumpToBuilding('4')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                insideGroup === '4'
-                  ? 'bg-blue-600 text-white shadow'
-                  : 'text-slate-300 hover:bg-slate-700'
-              }`}
-            >
-              4号館（西側）
-            </button>
-            <button
-              onClick={() => handleJumpToBuilding('5')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                insideGroup === '5'
-                  ? 'bg-blue-600 text-white shadow'
-                  : 'text-slate-300 hover:bg-slate-700'
-              }`}
-            >
-              5号館（西側）
-            </button>
-            <button
-              onClick={() => handleJumpToBuilding('1236')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                insideGroup === '1236'
-                  ? 'bg-blue-600 text-white shadow'
-                  : 'text-slate-300 hover:bg-slate-700'
-              }`}
-            >
-              1・2・3・6号館
-            </button>
-          </div>
+        {/* ワンクリック移動ボタン */}
+        <div className="hidden md:flex items-center gap-1.5 bg-slate-800 px-2 py-1 rounded-lg border border-slate-700">
+          <span className="text-[10px] text-slate-400 mr-1">移動先:</span>
+          <button
+            onClick={() => handleQuickJump('1-2-3-6')}
+            className="px-2 py-0.5 rounded bg-slate-700 hover:bg-blue-600 text-[11px] font-bold transition"
+          >
+            1・2・3・6号館
+          </button>
+          <button
+            onClick={() => handleQuickJump('patio')}
+            className="px-2 py-0.5 rounded bg-slate-700 hover:bg-amber-600 text-[11px] font-bold transition"
+          >
+            屋外階段B・5号館通路
+          </button>
+          <button
+            onClick={() => handleQuickJump('4')}
+            className="px-2 py-0.5 rounded bg-slate-700 hover:bg-blue-600 text-[11px] font-bold transition"
+          >
+            4号館
+          </button>
+          <button
+            onClick={() => handleQuickJump('5')}
+            className="px-2 py-0.5 rounded bg-slate-700 hover:bg-blue-600 text-[11px] font-bold transition"
+          >
+            5号館
+          </button>
+        </div>
 
-          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 shrink-0">
+          {isMobile && (
             <button
-              onClick={() => setTeleportTarget({ coords: [0, 38], ts: Date.now() })}
-              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-lg border border-slate-700"
+              onClick={() => setShowFloorMenu((prev) => !prev)}
+              className="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-600 text-xs font-bold text-slate-100 active:bg-slate-700"
             >
-              初期位置へ
+              階 ({currentFloor}) {showFloorMenu ? '▲' : '▼'}
             </button>
-            <button
-              onClick={onClose}
-              className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg transition"
-            >
-              2Dマップへ戻る ✕
-            </button>
+          )}
+          <button
+            onClick={onClose}
+            className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-xs font-bold transition shadow"
+          >
+            ✕ 戻る
+          </button>
+        </div>
+      </div>
+
+      {/* スマホ用：ワープボタンバー */}
+      {isMobile && (
+        <div className="bg-slate-800/95 border-b border-slate-700 px-2 py-1.5 flex items-center justify-around gap-1 z-10">
+          <button
+            onClick={() => handleQuickJump('1-2-3-6')}
+            className="flex-1 py-1 rounded bg-slate-700 active:bg-blue-600 text-[10px] text-white font-bold"
+          >
+            1・2・3・6号館
+          </button>
+          <button
+            onClick={() => handleQuickJump('patio')}
+            className="flex-1 py-1 rounded bg-slate-700 active:bg-amber-600 text-[10px] text-white font-bold"
+          >
+            階段B・通路
+          </button>
+          <button
+            onClick={() => handleQuickJump('4')}
+            className="flex-1 py-1 rounded bg-slate-700 active:bg-blue-600 text-[10px] text-white font-bold"
+          >
+            4号館
+          </button>
+          <button
+            onClick={() => handleQuickJump('5')}
+            className="flex-1 py-1 rounded bg-slate-700 active:bg-blue-600 text-[10px] text-white font-bold"
+          >
+            5号館
+          </button>
+        </div>
+      )}
+
+      {/* スマホ用 階数切り替えパネル */}
+      {isMobile && showFloorMenu && (
+        <div className="bg-slate-900/95 border-b border-slate-700 px-3 py-2.5 z-20 shadow-xl">
+          <div className="flex flex-wrap gap-1.5">
+            {allFloors.map((fl) => (
+              <button
+                key={fl}
+                onClick={() => handleSelectFloor(fl)}
+                className={`px-2.5 py-1.5 rounded text-xs font-bold transition ${
+                  currentFloor === fl
+                    ? 'bg-emerald-600 text-white shadow'
+                    : 'bg-slate-800 text-slate-300 border border-slate-700'
+                }`}
+              >
+                {fl}
+              </button>
+            ))}
           </div>
         </div>
       )}
 
-      {/* 3Dメインビューポート */}
-      <div className="flex-1 relative touch-none">
-        <Canvas shadows camera={{ position: [0, 16, 54], fov: isPortrait ? 56 : 45 }}>
+      {/* 3D キャンバス */}
+      <div className="relative flex-1 w-full h-full touch-none">
+        <Canvas shadows camera={{ position: [0, 16, 56], fov: 45 }}>
           <color attach="background" args={['#bae6fd']} />
-          <fog attach="fog" args={['#e0f2fe', 110, 260]} />
+          <fog attach="fog" args={['#bae6fd', 140, 320]} />
 
-          <hemisphereLight args={['#f0f9ff', '#bbf7d0', 0.85]} />
+          <ambientLight intensity={0.85} />
           <directionalLight
-            position={[35, 65, 30]}
-            intensity={1.15}
+            position={[60, 100, 60]}
+            intensity={1.1}
             castShadow
-            shadow-mapSize-width={2048}
-            shadow-mapSize-height={2048}
-            shadow-camera-left={-150}
-            shadow-camera-right={80}
-            shadow-camera-top={80}
-            shadow-camera-bottom={-80}
+            shadow-mapSize={[2048, 2048]}
           />
 
-          {/* キャンパス外観・中庭・屋外大階段・2号館側大通り・歩行者デッキ（建物内では外壁が自動消去） */}
           <CampusScenery currentFloor={currentFloor} insideGroup={insideGroup} />
 
-          {/* 床ゾーン群 */}
+          {/* 各棟・デッキ・通路の歩行可能床面 */}
           {unifiedFloorData.buildingZones?.map((zone, idx) => {
             const zw = zone.maxX - zone.minX;
             const zd = zone.maxZ - zone.minZ;
             const zx = (zone.minX + zone.maxX) / 2;
             const zz = (zone.minZ + zone.maxZ) / 2;
             return (
-              <group key={`${zone.name}-${idx}`} position={[zx, 0, zz]}>
-                <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
+              <group key={`zone-${idx}`}>
+                <mesh rotation={[-Math.PI / 2, 0, 0]} position={[zx, 0, zz]} receiveShadow>
                   <planeGeometry args={[zw, zd]} />
-                  <meshStandardMaterial color={zone.floorColor} roughness={0.75} />
+                  <meshStandardMaterial color={zone.floorColor || '#e2e8f0'} roughness={0.8} />
                 </mesh>
-                <lineSegments position={[0, 0.02, 0]}>
-                  <edgesGeometry args={[new THREE.BoxGeometry(zw, 0.04, zd)]} />
-                  <lineBasicMaterial color="#64748b" />
-                </lineSegments>
+                <gridHelper
+                  args={[Math.max(zw, zd), Math.round(Math.max(zw, zd) / 4), '#94a3b8', '#cbd5e1']}
+                  position={[zx, 0.01, zz]}
+                />
+                <Html position={[zx, 0.15, zone.minZ + 2]} center distanceFactor={36}>
+                  <div className="text-slate-600/80 font-extrabold text-xs sm:text-sm tracking-widest pointer-events-none select-none whitespace-nowrap">
+                    {zone.name}
+                  </div>
+                </Html>
               </group>
             );
           })}
 
-          {/* 吹き抜けエリア */}
           {unifiedFloorData.voids?.map((v, idx) => (
-            <VoidBox key={idx} voidArea={v} />
+            <VoidBox key={`void-${idx}`} voidArea={v} />
           ))}
 
-          {/* 入り口（ドア）付きの密着教室群 */}
+          {unifiedFloorData.connectors?.map((c, idx) => (
+            <ConnectorSign key={`conn-${idx}`} connector={c} />
+          ))}
+
           {unifiedFloorData.rooms.map((room) => (
             <RoomBox key={room.id} room={room} />
           ))}
 
-          {/* 連絡通路サイン */}
-          {unifiedFloorData.connectors?.map((conn, idx) => (
-            <ConnectorSign key={idx} connector={conn} />
-          ))}
-
-          {/* エレベーター */}
           {unifiedFloorData.elevators.map((ev) => (
-            <ElevatorPad
-              key={ev.id}
-              ev={ev}
-              isNear={nearElevator?.id === ev.id}
-            />
+            <ElevatorPad key={ev.id} ev={ev} isNear={nearElevator?.id === ev.id} />
           ))}
 
-          {/* プレイヤーキャラクター操作 */}
           <PlayerController
             currentFloor={currentFloor}
             unifiedFloorData={unifiedFloorData}
             keysPressed={keysPressed}
             joystickInput={joystickInput}
-            onNearElevatorChange={(ev) => {
-              if (ev?.id !== nearElevator?.id) setNearElevator(ev);
-            }}
-            onCurrentBuildingChange={(bldg) => setCurrentSubBldg(bldg)}
-            onInsideGroupChange={(grp) => setInsideGroup(grp)}
+            onNearElevatorChange={setNearElevator}
+            onCurrentBuildingChange={setCurrentSubBldg}
+            onInsideGroupChange={setInsideGroup}
             onFloorAutoSwitch={(nextFl) => setCurrentFloor(nextFl)}
             teleportTarget={teleportTarget}
             isPortrait={isPortrait}
           />
         </Canvas>
 
-        {/* スマホ用操作UI */}
-        {isMobile ? (
-          <>
-            <div className="absolute bottom-5 left-5 z-10">
-              <VirtualJoystick joystickRef={joystickInput} />
-            </div>
-
-            <div className="absolute bottom-5 right-5 z-20 flex flex-col items-end">
-              {isMobileFloorOpen && (
-                <div className="mb-2.5 bg-slate-900/95 backdrop-blur border border-slate-600 rounded-2xl p-3 text-white shadow-2xl w-72 max-w-[85vw] max-h-[55vh] overflow-y-auto">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold text-emerald-400">
-                      🏢 フロア選択
-                    </span>
-                    <button
-                      onClick={() => setIsMobileFloorOpen(false)}
-                      className="text-xs text-slate-300 px-2 py-0.5 bg-slate-800 rounded-lg"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                  <div className="flex flex-wrap gap-1.5 mb-2.5">
-                    {allFloors.map((fl) => (
-                      <button
-                        key={fl}
-                        onClick={() => {
-                          setCurrentFloor(fl);
-                          setNearElevator(null);
-                          setIsMobileFloorOpen(false);
-                        }}
-                        className={`px-2.5 py-1.5 rounded-lg text-xs font-bold ${
-                          currentFloor === fl
-                            ? 'bg-emerald-500 text-slate-950'
-                            : 'bg-slate-800 text-slate-200'
-                        }`}
-                      >
-                        {fl}
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="border-t border-slate-700 pt-2">
-                    <p className="text-[11px] font-bold text-slate-400 mb-1.5">
-                      🚶 クイック移動（{currentFloor}）
-                    </p>
-                    <div className="grid grid-cols-2 gap-1.5">
-                      {getQuickSpots().map((spot) => (
-                        <button
-                          key={spot.name}
-                          onClick={() => {
-                            setTeleportTarget({ coords: spot.coords, ts: Date.now() });
-                            setIsMobileFloorOpen(false);
-                          }}
-                          className="px-2 py-1.5 rounded-lg text-[11px] font-bold bg-slate-800 active:bg-blue-600 text-slate-200 text-left leading-tight"
-                        >
-                          {spot.name}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <button
-                onClick={() => setIsMobileFloorOpen((prev) => !prev)}
-                className="px-3.5 py-3 bg-slate-900/90 active:bg-slate-800 text-white border border-emerald-500/80 rounded-2xl shadow-xl text-xs font-bold flex items-center gap-1.5"
-              >
-                <span>🏢 {currentFloor} / フロア</span>
-                <span>{isMobileFloorOpen ? '▼' : '▲'}</span>
-              </button>
-            </div>
-          </>
-        ) : (
-          /* PCデスクトップ用レイアウト */
-          <div className="absolute bottom-5 left-5 bg-slate-900/90 backdrop-blur border border-slate-700 rounded-xl p-3 text-white shadow-xl z-10 flex flex-col gap-3 max-w-[280px]">
-            <div>
-              <p className="text-[11px] font-bold text-emerald-400 mb-1.5">
-                🏢 全号館フロア切替
-              </p>
-              <div className="flex flex-wrap gap-1.5">
+        {/* PC版：左上の操作ガイド & 階数クイック選択 */}
+        {!isMobile && (
+          <div className="absolute top-4 left-4 bg-slate-900/85 backdrop-blur-md text-white p-3.5 rounded-xl border border-slate-700 max-w-xs shadow-xl">
+            <h3 className="text-xs font-bold text-blue-300 uppercase tracking-wider mb-1.5">
+              操作方法
+            </h3>
+            <ul className="text-xs space-y-1 text-slate-200 mb-3">
+              <li><span className="font-bold text-white">W A S D / 矢印キー</span>：移動（ドアから入室可）</li>
+              <li><span className="font-bold text-white">マウスドラッグ</span>：視点回転</li>
+              <li><span className="font-bold text-white">1F 屋外階段B</span>：歩くと自動で2F正門デッキへ</li>
+              <li><span className="font-bold text-white">階段Bの西側通路</span>：そのまま5号館へ徒歩移動可</li>
+            </ul>
+            <div className="pt-2 border-t border-slate-700">
+              <span className="text-[11px] text-slate-400 block mb-1.5">階数ダイレクト切替</span>
+              <div className="flex flex-wrap gap-1">
                 {allFloors.map((fl) => (
                   <button
                     key={fl}
-                    onClick={() => {
-                      setCurrentFloor(fl);
-                      setNearElevator(null);
-                    }}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${
+                    onClick={() => handleSelectFloor(fl)}
+                    className={`px-2 py-0.5 rounded text-xs font-bold transition ${
                       currentFloor === fl
-                        ? 'bg-emerald-500 text-slate-950 shadow'
-                        : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
                     }`}
                   >
                     {fl}
@@ -1623,55 +1504,60 @@ export default function ThreeCampusViewer({ onClose }) {
                 ))}
               </div>
             </div>
-
-            <div className="border-t border-slate-700/80 pt-2.5">
-              <p className="text-[11px] font-bold text-slate-400 mb-1.5">
-                🚶 クイック移動（{currentFloor}）
-              </p>
-              <div className="grid grid-cols-2 gap-1.5">
-                {getQuickSpots().map((spot) => (
-                  <button
-                    key={spot.name}
-                    onClick={() => setTeleportTarget({ coords: spot.coords, ts: Date.now() })}
-                    className="px-2 py-1.5 rounded-lg text-[10px] font-bold bg-slate-800 hover:bg-blue-600 text-slate-200 hover:text-white transition text-left leading-tight"
-                  >
-                    {spot.name}
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
         )}
 
-        {/* 中央下：エレベーター到達時UI */}
+        {/* スマホ版：左下のバーチャルスティック */}
+        {isMobile && (
+          <div className="absolute bottom-6 left-5 z-20">
+            <VirtualJoystick joystickRef={joystickInput} />
+          </div>
+        )}
+
+        {/* エレベーター到達時の行き先選択パネル */}
         {nearElevator && (
           <div
-            className={`absolute left-1/2 -translate-x-1/2 bg-emerald-950/95 border-2 border-emerald-400 text-white rounded-2xl shadow-2xl z-20 text-center ${
-              isMobile ? 'bottom-36 px-3.5 py-2.5 w-[90%] max-w-sm' : 'bottom-6 px-5 py-3.5 max-w-md w-[90%]'
+            className={`z-30 bg-slate-900/95 backdrop-blur-md text-white border-2 border-emerald-500 shadow-2xl ${
+              isMobile
+                ? 'fixed bottom-4 left-3 right-3 p-3.5 rounded-2xl'
+                : 'absolute bottom-8 left-1/2 -translate-x-1/2 p-4 rounded-2xl max-w-md w-full'
             }`}
           >
-            <p className="text-xs font-bold text-emerald-300 mb-1.5">
-              🛗 {nearElevator.name}：移動階を選択
-            </p>
-            <div className="flex flex-wrap justify-center gap-1.5">
-              {nearElevator.targets.map((fl) => (
-                <button
-                  key={fl}
-                  onClick={() => {
-                    setCurrentFloor(fl);
-                    setNearElevator(null);
-                  }}
-                  className={`rounded-lg font-bold transition ${
-                    isMobile ? 'px-2.5 py-1 text-xs' : 'px-3 py-1 text-xs'
-                  } ${
-                    currentFloor === fl
-                      ? 'bg-emerald-500 text-slate-950'
-                      : 'bg-slate-800 hover:bg-emerald-600 text-white'
-                  }`}
-                >
-                  {fl}
-                </button>
-              ))}
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🛗</span>
+                <div>
+                  <h4 className="font-bold text-xs sm:text-sm text-emerald-300">
+                    {nearElevator.name}
+                  </h4>
+                  <p className="text-[10px] sm:text-xs text-slate-300">
+                    移動先の階をタップしてください
+                  </p>
+                </div>
+              </div>
+              <span className="text-[11px] bg-slate-800 px-2 py-0.5 rounded text-slate-300">
+                現在 {currentFloor}
+              </span>
+            </div>
+
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {nearElevator.targets.map((targetFl) => {
+                const isCurrent = targetFl === currentFloor;
+                return (
+                  <button
+                    key={targetFl}
+                    disabled={isCurrent}
+                    onClick={() => handleSelectFloor(targetFl)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                      isCurrent
+                        ? 'bg-slate-700 text-slate-400 cursor-default'
+                        : 'bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white shadow'
+                    }`}
+                  >
+                    {targetFl}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
