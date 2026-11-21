@@ -201,7 +201,7 @@ function buildConnectedRooms(rawRooms, buildingZones) {
     }
 
     const sideLen = bestSide === 'north' || bestSide === 'south' ? w : d;
-    const doorWidth = Math.min(2.2, Math.max(1.2, sideLen * 0.55));
+    const doorWidth = Math.min(2.4, Math.max(1.4, sideLen * 0.55));
 
     return {
       ...box,
@@ -263,7 +263,7 @@ function TrafficSignal({ position, rotation = [0, 0, 0] }) {
   );
 }
 
-// 案内板準拠のキャンパス道路・信号・モニュメント広場・駐輪場/駐車場・屋外階段B
+// キャンパス道路・信号・芝生広場・モニュメント広場・屋外階段B・吹き抜け大階段
 function CampusScenery({ currentFloor }) {
   const floorNum = parseInt(currentFloor.replace('F', ''), 10) || 1;
   const groundY = -(floorNum - 1) * 3.4;
@@ -288,21 +288,27 @@ function CampusScenery({ currentFloor }) {
         <meshStandardMaterial color="#d6d3d1" roughness={0.85} />
       </mesh>
 
-      {/* 左側街区の南側ブロック（案内板左下のグレー区画） */}
+      {/* 5号館北側（センタープロムナード側）の楕円芝生広場（外観写真準拠） */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-34, groundY - 0.04, -55]} receiveShadow>
+        <planeGeometry args={[30, 8]} />
+        <meshStandardMaterial color="#4d7c0f" roughness={0.9} />
+      </mesh>
+
+      {/* 左側街区の南側ブロック */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-66, groundY - 0.08, 22]} receiveShadow>
         <planeGeometry args={[104, 38]} />
         <meshStandardMaterial color="#64748b" roughness={0.9} />
       </mesh>
 
       {/* =================================================================== */}
-      {/* 1. 道路・センタープロムナード・信号＆横断歩道（案内板準拠）          */}
+      {/* 1. 道路・センタープロムナード・信号＆横断歩道                       */}
       {/* =================================================================== */}
       {/* 北側 センタープロムナード（東西歩行者緑道） */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-15, groundY - 0.05, -62]} receiveShadow>
-        <planeGeometry args={[216, 12]} />
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-15, groundY - 0.05, -66]} receiveShadow>
+        <planeGeometry args={[216, 10]} />
         <meshStandardMaterial color="#e7e5e4" roughness={0.8} />
       </mesh>
-      <Html position={[-30, groundY + 0.3, -62]} center distanceFactor={42}>
+      <Html position={[-30, groundY + 0.3, -66]} center distanceFactor={42}>
         <div className="bg-slate-800/80 text-white px-3 py-0.5 rounded-full text-xs font-bold tracking-wider pointer-events-none select-none whitespace-nowrap">
           センタープロムナード
         </div>
@@ -314,51 +320,54 @@ function CampusScenery({ currentFloor }) {
         <meshStandardMaterial color="#334155" roughness={0.9} />
       </mesh>
 
-      {/* 左側街区（4・5号館）と南側区画の間の東西道路（Z=-6〜+2） */}
+      {/* 左側街区（4・5号館）と南側区画の間の東西道路 */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-66, groundY - 0.06, -2]} receiveShadow>
         <planeGeometry args={[112, 8]} />
         <meshStandardMaterial color="#334155" roughness={0.9} />
       </mesh>
 
-      {/* 【重要】5号館の目の前の横断歩道＆信号（X=-10〜+8, Z=-17） */}
+      {/* 5号館 南東角の信号前1F入口（風除室）直結の横断歩道＆信号 */}
       {[-3.5, -1.75, 0, 1.75, 3.5].map((zOff, i) => (
-        <mesh key={`cw-main-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[-1, groundY - 0.02, -17 + zOff]}>
+        <mesh key={`cw-main-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[-1, groundY - 0.02, -16.5 + zOff]}>
           <planeGeometry args={[16, 1.0]} />
           <meshBasicMaterial color="#f8fafc" />
         </mesh>
       ))}
-      <TrafficSignal position={[-11, groundY, -12]} rotation={[0, Math.PI / 2, 0]} />
-      <TrafficSignal position={[9, groundY, -22]} rotation={[0, -Math.PI / 2, 0]} />
+      <TrafficSignal position={[-11, groundY, -11.5]} rotation={[0, Math.PI / 2, 0]} />
+      <TrafficSignal position={[9, groundY, -21.5]} rotation={[0, -Math.PI / 2, 0]} />
 
-      {/* 案内板下側の横断歩道2箇所（南東側・南西側） */}
-      {[-3, -1, 1, 3].map((zOff, i) => (
-        <mesh key={`cw-se-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[-13, groundY - 0.02, 8 + zOff]}>
-          <planeGeometry args={[5, 0.9]} />
-          <meshBasicMaterial color="#f8fafc" />
-        </mesh>
-      ))}
-      {[-3, -1, 1, 3].map((zOff, i) => (
-        <mesh key={`cw-sw-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[-116, groundY - 0.02, 8 + zOff]}>
-          <planeGeometry args={[5, 0.9]} />
-          <meshBasicMaterial color="#f8fafc" />
-        </mesh>
-      ))}
+      {/* 5号館 1F学生ホール内の吹き抜け大階段（内部写真準拠：X=-24, Z=-34） */}
+      <group position={[-24, groundY, -34]}>
+        {Array.from({ length: 12 }).map((_, i) => {
+          const stepY = (i + 0.5) * (3.4 / 12);
+          const stepZ = (i + 0.5) * (9 / 12);
+          return (
+            <mesh key={`bldg5-stair-${i}`} position={[0, stepY, stepZ]} castShadow receiveShadow>
+              <boxGeometry args={[2.4, 3.4 / 12, 9 / 12 + 0.1]} />
+              <meshStandardMaterial color="#d97706" roughness={0.6} />
+            </mesh>
+          );
+        })}
+      </group>
+
+      {/* 5号館 ⇔ 4号館 2F連絡デッキ（外観写真右側に写っている2F連絡橋） */}
+      <mesh position={[-54, groundY + 3.4, -22]} castShadow receiveShadow>
+        <boxGeometry args={[4.2, 0.4, 8]} />
+        <meshStandardMaterial color="#e2e8f0" />
+      </mesh>
 
       {/* =================================================================== */}
       {/* 2. 中庭（パティオ）・モニュメント広場・屋外階段B・正門デッキ         */}
       {/* =================================================================== */}
-      {/* 中庭のレンガ舗装 */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[42, groundY - 0.03, 6]} receiveShadow>
         <planeGeometry args={[8, 44]} />
         <meshStandardMaterial color="#9a3412" roughness={0.85} />
       </mesh>
 
-      {/* モニュメント広場（2号館北側〜正門下ピロティ通り道） */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[26, groundY - 0.02, -34]} receiveShadow>
         <planeGeometry args={[26, 36]} />
         <meshStandardMaterial color="#f5f5f4" roughness={0.75} />
       </mesh>
-      {/* モニュメント（案内板の白い四角モニュメント） */}
       <mesh position={[23, groundY + 0.6, -34]} castShadow>
         <boxGeometry args={[4, 1.2, 4]} />
         <meshStandardMaterial color="#e2e8f0" />
@@ -369,7 +378,6 @@ function CampusScenery({ currentFloor }) {
         </div>
       </Html>
 
-      {/* 2F正門エントランスデッキ（1Fピロティ通り道の上部スラブ＆丸柱） */}
       <group position={[29, groundY, -36]}>
         <mesh position={[0, 3.5, 0]} castShadow receiveShadow>
           <boxGeometry args={[30, 0.6, 36]} />
@@ -393,7 +401,7 @@ function CampusScenery({ currentFloor }) {
         ))}
       </group>
 
-      {/* 屋外階段B（Z=-18から北Z=-32へ登り、1F中庭⇔2F正門デッキを接続） */}
+      {/* 屋外階段B */}
       <group position={[40, groundY, -18]}>
         {Array.from({ length: 14 }).map((_, i) => {
           const stepY = (i + 0.5) * (3.5 / 14);
@@ -411,7 +419,7 @@ function CampusScenery({ currentFloor }) {
         </mesh>
       </group>
 
-      {/* 1号館南側の駐輪場・駐車場（案内板右下） */}
+      {/* 1号館南側の駐輪場・駐車場 */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[21, groundY - 0.02, 59]} receiveShadow>
         <planeGeometry args={[14, 8]} />
         <meshStandardMaterial color="#cbd5e1" />
@@ -440,13 +448,12 @@ function CampusScenery({ currentFloor }) {
   );
 }
 
-// 建物の外周壁＋入口開口部（ドアゲート）を描画するコンポーネント
+// 建物の外周壁＋入口開口部（ドアゲート）
 function BuildingPerimeterWalls({ zone, entrances, isCurrentFloor }) {
   const wallH = 3.1;
   const wallT = 0.28;
-  const doorW = 3.6;
+  const doorW = 3.8;
 
-  // 各辺（north, south, east, west）にある入口を抽出
   const getSideEntrances = (side) =>
     entrances.filter(
       (e) =>
@@ -457,7 +464,6 @@ function BuildingPerimeterWalls({ zone, entrances, isCurrentFloor }) {
         e.z <= zone.maxZ + 0.5
     );
 
-  // 1辺の壁を入口開口部で分割して描画
   const renderEdgeWithDoors = (side, start, end, fixedCoord, isHorizontal) => {
     const sideEnts = getSideEntrances(side).sort((a, b) =>
       isHorizontal ? a.x - b.x : a.z - b.z
@@ -485,12 +491,12 @@ function BuildingPerimeterWalls({ zone, entrances, isCurrentFloor }) {
       return isHorizontal ? (
         <mesh key={`${side}-${idx}`} position={[mid, wallH / 2, fixedCoord]} castShadow>
           <boxGeometry args={[len, wallH, wallT]} />
-          <meshStandardMaterial color="#94a3b8" transparent opacity={isCurrentFloor ? 0.55 : 0.85} />
+          <meshStandardMaterial color="#94a3b8" transparent opacity={isCurrentFloor ? 0.5 : 0.85} />
         </mesh>
       ) : (
         <mesh key={`${side}-${idx}`} position={[fixedCoord, wallH / 2, mid]} castShadow>
           <boxGeometry args={[wallT, wallH, len]} />
-          <meshStandardMaterial color="#94a3b8" transparent opacity={isCurrentFloor ? 0.55 : 0.85} />
+          <meshStandardMaterial color="#94a3b8" transparent opacity={isCurrentFloor ? 0.5 : 0.85} />
         </mesh>
       );
     });
@@ -512,7 +518,7 @@ function EntranceGateMarker({ entrance }) {
   return (
     <group position={[entrance.x, 0, entrance.z]}>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 0]}>
-        <planeGeometry args={[3.4, 2.2]} />
+        <planeGeometry args={[3.6, 2.2]} />
         <meshBasicMaterial color={is2F ? '#0284c7' : '#d97706'} transparent opacity={0.45} />
       </mesh>
       <Html position={[0, 2.6, 0]} center distanceFactor={28} zIndexRange={[15, 0]}>
@@ -530,7 +536,7 @@ function EntranceGateMarker({ entrance }) {
   );
 }
 
-// 教室・研究室・事務室（壁とドア付き）
+// 教室・研究室・事務室・風除室（壁とドア付き）
 function RoomBox({ room }) {
   const wallH = 2.7;
   const wallT = 0.22;
@@ -545,15 +551,15 @@ function RoomBox({ room }) {
         <>
           <mesh position={[-offset, wallH / 2, 0]} castShadow>
             <boxGeometry args={[sideW, wallH, wallT]} />
-            <meshStandardMaterial color={room.color} transparent opacity={0.72} />
+            <meshStandardMaterial color={room.color} transparent opacity={0.68} />
           </mesh>
           <mesh position={[offset, wallH / 2, 0]} castShadow>
             <boxGeometry args={[sideW, wallH, wallT]} />
-            <meshStandardMaterial color={room.color} transparent opacity={0.72} />
+            <meshStandardMaterial color={room.color} transparent opacity={0.68} />
           </mesh>
           <mesh position={[0, wallH - 0.35, 0]}>
             <boxGeometry args={[doorWidth, 0.7, wallT]} />
-            <meshStandardMaterial color={room.color} transparent opacity={0.72} />
+            <meshStandardMaterial color={room.color} transparent opacity={0.68} />
           </mesh>
         </>
       );
@@ -562,15 +568,15 @@ function RoomBox({ room }) {
       <>
         <mesh position={[0, wallH / 2, -offset]} castShadow>
           <boxGeometry args={[wallT, wallH, sideW]} />
-          <meshStandardMaterial color={room.color} transparent opacity={0.72} />
+          <meshStandardMaterial color={room.color} transparent opacity={0.68} />
         </mesh>
         <mesh position={[0, wallH / 2, offset]} castShadow>
           <boxGeometry args={[wallT, wallH, sideW]} />
-          <meshStandardMaterial color={room.color} transparent opacity={0.72} />
+          <meshStandardMaterial color={room.color} transparent opacity={0.68} />
         </mesh>
         <mesh position={[0, wallH - 0.35, 0]}>
           <boxGeometry args={[wallT, 0.7, doorWidth]} />
-          <meshStandardMaterial color={room.color} transparent opacity={0.72} />
+          <meshStandardMaterial color={room.color} transparent opacity={0.68} />
         </mesh>
       </>
     );
@@ -589,7 +595,7 @@ function RoomBox({ room }) {
         ) : (
           <mesh position={[0, wallH / 2, 0]} castShadow>
             <boxGeometry args={[w, wallH, wallT]} />
-            <meshStandardMaterial color={room.color} transparent opacity={0.72} />
+            <meshStandardMaterial color={room.color} transparent opacity={0.68} />
           </mesh>
         )}
       </group>
@@ -600,7 +606,7 @@ function RoomBox({ room }) {
         ) : (
           <mesh position={[0, wallH / 2, 0]} castShadow>
             <boxGeometry args={[w, wallH, wallT]} />
-            <meshStandardMaterial color={room.color} transparent opacity={0.72} />
+            <meshStandardMaterial color={room.color} transparent opacity={0.68} />
           </mesh>
         )}
       </group>
@@ -611,7 +617,7 @@ function RoomBox({ room }) {
         ) : (
           <mesh position={[0, wallH / 2, 0]} castShadow>
             <boxGeometry args={[wallT, wallH, d]} />
-            <meshStandardMaterial color={room.color} transparent opacity={0.72} />
+            <meshStandardMaterial color={room.color} transparent opacity={0.68} />
           </mesh>
         )}
       </group>
@@ -622,7 +628,7 @@ function RoomBox({ room }) {
         ) : (
           <mesh position={[0, wallH / 2, 0]} castShadow>
             <boxGeometry args={[wallT, wallH, d]} />
-            <meshStandardMaterial color={room.color} transparent opacity={0.72} />
+            <meshStandardMaterial color={room.color} transparent opacity={0.68} />
           </mesh>
         )}
       </group>
@@ -717,7 +723,6 @@ function PlayerController({
   onFloorAutoSwitch,
   teleportTarget,
   isPortrait,
-  rotationDeg,
 }) {
   const playerRef = useRef();
   const controlsRef = useRef();
@@ -752,6 +757,11 @@ function PlayerController({
       return false;
     }
 
+    // 風除室は入口とホール側の両面を通過できるようにする
+    if (room.id && room.id.startsWith('5-fujo')) {
+      return false;
+    }
+
     if (Math.abs(pz - minZ) <= wallThick && px >= minX - wallThick && px <= maxX + wallThick) {
       if (room.doorSide === 'north' && Math.abs(px - room.x) <= halfDoor) return false;
       return true;
@@ -771,10 +781,10 @@ function PlayerController({
     return false;
   };
 
-  // 建物の外周壁当たり判定（入口ゲート開口部は通過可能！）
+  // 建物の外周壁当たり判定（入口ゲート開口部は通過可能）
   const isBlockedByBuildingPerimeter = (px, pz, zone, entrances) => {
     const wallThick = 0.36;
-    const halfDoor = 1.9;
+    const halfDoor = 2.0;
 
     const nearNorth = Math.abs(pz - zone.minZ) <= wallThick && px >= zone.minX - wallThick && px <= zone.maxX + wallThick;
     const nearSouth = Math.abs(pz - zone.maxZ) <= wallThick && px >= zone.minX - wallThick && px <= zone.maxX + wallThick;
@@ -783,7 +793,6 @@ function PlayerController({
 
     if (!nearNorth && !nearSouth && !nearWest && !nearEast) return false;
 
-    // 入口開口部にいる場合は通過OK
     for (const ent of entrances) {
       if (nearNorth && ent.side === 'north' && Math.abs(px - ent.x) <= halfDoor) return false;
       if (nearSouth && ent.side === 'south' && Math.abs(px - ent.x) <= halfDoor) return false;
@@ -795,7 +804,6 @@ function PlayerController({
   };
 
   const checkCollision = (nextX, nextZ) => {
-    // 1Fはキャンパス敷地全体（道路・信号・中庭・館内）を自由に歩ける。2F以上は建物・デッキゾーン内のみ
     if (currentFloor !== '1F') {
       const isPointInAnyZone = (px, pz) =>
         unifiedFloorData.buildingZones?.some(
@@ -812,7 +820,6 @@ function PlayerController({
         return true;
       }
     } else {
-      // 1F外周の最大範囲制限
       if (nextX < -122 || nextX > 92 || nextZ < -72 || nextZ > 68) return true;
     }
 
@@ -830,7 +837,6 @@ function PlayerController({
       }
     }
 
-    // 建物の外周壁判定（1F入口・2F入口のみ通過可）
     for (const z of unifiedFloorData.buildingZones || []) {
       if (!z.isOutdoor) {
         if (isBlockedByBuildingPerimeter(nextX, nextZ, z, unifiedFloorData.entrances || [])) {
@@ -839,7 +845,6 @@ function PlayerController({
       }
     }
 
-    // 教室（rooms）の壁判定（※facilitiesは壁なしなので通り抜け可能）
     for (const room of unifiedFloorData.rooms) {
       if (isBlockedByRoomWall(nextX, nextZ, room)) {
         return true;
@@ -860,28 +865,20 @@ function PlayerController({
     return [44, 41];
   };
 
-  // ローカル座標をキャンパス回転角に応じてワールド座標へ変換するヘルパー
-  const rotRad = (rotationDeg * Math.PI) / 180;
-  const toWorld = (lx, lz) => ({
-    wx: lx * Math.cos(rotRad) - lz * Math.sin(rotRad),
-    wz: lx * Math.sin(rotRad) + lz * Math.cos(rotRad),
-  });
-
   useEffect(() => {
     const rawTarget = teleportTarget ? teleportTarget.coords : [44, 41];
     const [safeX, safeZ] = resolveSafePosition(rawTarget[0], rawTarget[1]);
 
     posRef.current.set(safeX, 0, safeZ);
-    const { wx, wz } = toWorld(safeX, safeZ);
     if (playerRef.current) {
       playerRef.current.position.set(safeX, 0, safeZ);
     }
-    camera.position.set(wx, isPortrait ? 24 : 20, wz + (isPortrait ? 26 : 24));
+    camera.position.set(safeX, isPortrait ? 24 : 20, safeZ + (isPortrait ? 26 : 24));
     if (controlsRef.current) {
-      controlsRef.current.target.set(wx, 1, wz);
+      controlsRef.current.target.set(safeX, 1, safeZ);
       controlsRef.current.update();
     }
-  }, [teleportTarget, camera, rotationDeg]);
+  }, [teleportTarget, camera]);
 
   useFrame((_, delta) => {
     if (stairCooldownRef.current > 0) {
@@ -913,55 +910,46 @@ function PlayerController({
       const camRight = new THREE.Vector3();
       camRight.crossVectors(camDir, new THREE.Vector3(0, 1, 0)).normalize();
 
-      const worldMove = new THREE.Vector3()
+      const moveVec = new THREE.Vector3()
         .addScaledVector(camDir, inputForward)
         .addScaledVector(camRight, inputRight)
         .normalize()
         .multiplyScalar(baseSpeed * inputMagnitude);
 
-      // ワールド移動ベクトルをキャンパス回転逆変換でローカル移動ベクトルへ変換
-      const cosR = Math.cos(-rotRad);
-      const sinR = Math.sin(-rotRad);
-      const localDx = worldMove.x * cosR - worldMove.z * sinR;
-      const localDz = worldMove.x * sinR + worldMove.z * cosR;
-
-      const nextX = posRef.current.x + localDx;
-      const nextZ = posRef.current.z + localDz;
+      const nextX = posRef.current.x + moveVec.x;
+      const nextZ = posRef.current.z + moveVec.z;
 
       let actualDx = 0;
       let actualDz = 0;
       if (!checkCollision(nextX, posRef.current.z)) {
         posRef.current.x = nextX;
-        actualDx = localDx;
+        actualDx = moveVec.x;
       }
       if (!checkCollision(posRef.current.x, nextZ)) {
         posRef.current.z = nextZ;
-        actualDz = localDz;
+        actualDz = moveVec.z;
       }
 
-      rotYRef.current = Math.atan2(localDx, localDz);
+      rotYRef.current = Math.atan2(moveVec.x, moveVec.z);
 
       if (playerRef.current) {
         playerRef.current.position.copy(posRef.current);
         playerRef.current.rotation.y = rotYRef.current;
       }
 
-      const wDx = actualDx * Math.cos(rotRad) - actualDz * Math.sin(rotRad);
-      const wDz = actualDx * Math.sin(rotRad) + actualDz * Math.cos(rotRad);
-      camera.position.x += wDx;
-      camera.position.z += wDz;
+      camera.position.x += actualDx;
+      camera.position.z += actualDz;
 
-      const { wx, wz } = toWorld(posRef.current.x, posRef.current.z);
       if (controlsRef.current) {
-        controlsRef.current.target.set(wx, 1, wz);
+        controlsRef.current.target.set(posRef.current.x, 1, posRef.current.z);
       }
     }
 
-    // 屋外階段B（X: 36.4〜43.6, Z: -32〜-18）での高さ追従＆1F⇔2F自動切替
     let playerY = 0;
     const px = posRef.current.x;
     const pz = posRef.current.z;
 
+    // 屋外階段B（X: 36.4〜43.6, Z: -32〜-18）での高さ追従＆1F⇔2F自動切替
     if (currentFloor === '1F' && px >= 36.4 && px <= 43.6 && pz <= -18 && pz >= -32) {
       const progress = (-18 - pz) / 14;
       playerY = progress * 3.5;
@@ -976,6 +964,17 @@ function PlayerController({
       onFloorAutoSwitch('1F');
     }
 
+    // 5号館 1F学生ホール吹き抜け大階段（X: -25.2〜-22.8, Z: -34〜-25）での高さ追従＆1F⇔2F切替
+    if (currentFloor === '1F' && px >= -25.2 && px <= -22.8 && pz >= -34 && pz <= -25) {
+      const progress = (pz - -34) / 9;
+      playerY = progress * 3.4;
+      if (pz >= -25.4 && stairCooldownRef.current <= 0) {
+        stairCooldownRef.current = 1.0;
+        posRef.current.x = -27;
+        onFloorAutoSwitch('2F');
+      }
+    }
+
     if (playerRef.current) {
       playerRef.current.position.y = playerY;
     }
@@ -987,7 +986,7 @@ function PlayerController({
     if (!areaLabel && currentFloor === '1F') {
       if (px >= -10 && px <= 8) areaLabel = '大通り・信号（横断歩道）';
       else if (px > 8) areaLabel = '1・2・3・6号館 屋外広場';
-      else areaLabel = '4・5号館 屋外歩道';
+      else areaLabel = '4・5号館 屋外歩道・芝生広場';
     }
     if (areaLabel && areaLabel !== lastBldgRef.current) {
       lastBldgRef.current = areaLabel;
@@ -1043,7 +1042,6 @@ export default function ThreeCampusViewer({ onClose }) {
   const [currentSubBldg, setCurrentSubBldg] = useState('1号館');
   const [nearElevator, setNearElevator] = useState(null);
   const [teleportTarget, setTeleportTarget] = useState({ coords: [44, 41], ts: 1 });
-  const [rotationDeg, setRotationDeg] = useState(0);
 
   const [isMobile, setIsMobile] = useState(false);
   const [isPortrait, setIsPortrait] = useState(false);
@@ -1088,29 +1086,35 @@ export default function ThreeCampusViewer({ onClose }) {
       area.voids?.forEach((v) => voids.push({ ...v }));
     });
 
-    // 案内板準拠の 1F入口・2F入口 配置
+    // 各号館の 1F入口・2F入口 配置（5号館1F平面図＆案内板準拠）
     if (currentFloor === '1F') {
       entrances.push(
-        // 1号館 1F入口（南側中央・駐輪場と駐車場の間）
         { label: '1号館 1F入口', x: 44, z: 52, side: 'south' },
-        // 1号館中庭側 1F通り抜け入口
         { label: '1号館 中庭側1F入口', x: 44, z: 30, side: 'north' },
-        // 2号館 1F入口（北面・赤いピン位置）
         { label: '2号館 1F入口', x: 24, z: -14, side: 'north' },
-        // 3号館 1F入口（西面南寄り・屋外階段Bの横）
         { label: '3号館 1F入口', x: 44, z: -22, side: 'west' },
-        // 6号館 1F入口（北面・3号館との間通路側 & 南面）
         { label: '6号館 北1F入口', x: 60, z: -12, side: 'north' },
         { label: '6号館 南1F入口', x: 54, z: 24, side: 'south' },
-        // 5号館 1F入口（信号・横断歩道のすぐ目の前＝南東角！ ＋ 北側1F入口）
-        { label: '5号館 1F入口（信号前）', x: -16, z: -18, side: 'east' },
-        { label: '5号館 北1F入口', x: -32, z: -48, side: 'north' },
-        // 4号館 1F入口（北面西寄り）
-        { label: '4号館 1F入口', x: -98, z: -48, side: 'north' }
+        // 5号館 1F入口①：信号・横断歩道の目の前（南東角・風除室）
+        { label: '5号館 1F入口（信号前）', x: -16, z: -16.5, side: 'east' },
+        // 5号館 1F入口②：北側中央（芝生広場・センタープロムナード側・風除室）
+        { label: '5号館 北1F入口（芝生広場側）', x: -34, z: -48, side: 'north' },
+        // 4号館 1F入口
+        { label: '4号館 1F入口', x: -96, z: -48, side: 'north' }
       );
     }
 
     if (currentFloor === '2F') {
+      buildingZones.push({
+        name: '5・4号館 2F連絡デッキ',
+        minX: -56,
+        maxX: -52,
+        minZ: -26,
+        maxZ: -18,
+        floorColor: '#cbd5e1',
+        isOutdoor: true,
+      });
+
       entrances.push(
         { label: '正門（Main Gate）', x: 30, z: -54, side: 'north' },
         { label: '1号館 2F入口', x: 44, z: 30, side: 'north' },
@@ -1118,8 +1122,10 @@ export default function ThreeCampusViewer({ onClose }) {
         { label: '3号館 2F入口', x: 44, z: -46, side: 'west' },
         { label: '6号館 北2F入口', x: 48, z: -6, side: 'west' },
         { label: '6号館 南2F入口', x: 48, z: 18, side: 'west' },
-        { label: '5号館 2F入口', x: -44, z: -48, side: 'north' },
-        { label: '4号館 2F入口', x: -76, z: -48, side: 'north' }
+        { label: '5号館 2F入口', x: -46, z: -48, side: 'north' },
+        { label: '5号館 2F連絡デッキ口', x: -52, z: -22, side: 'west' },
+        { label: '4号館 2F連絡デッキ口', x: -56, z: -22, side: 'east' },
+        { label: '4号館 2F入口', x: -75, z: -48, side: 'north' }
       );
     }
 
@@ -1156,25 +1162,21 @@ export default function ThreeCampusViewer({ onClose }) {
     setShowFloorMenu(false);
   };
 
-  const handleRotateCampus = () => {
-    setRotationDeg((prev) => (prev + 90) % 360);
-  };
-
   // クイック移動（ワープ）
   const handleQuickJump = (area) => {
     if (area === '1-2-3-6') {
       setTeleportTarget({ coords: [44, 41], ts: Date.now() });
     } else if (area === 'signal') {
       setCurrentFloor('1F');
-      setTeleportTarget({ coords: [16, -18], ts: Date.now() });
+      setTeleportTarget({ coords: [-11, -16.5], ts: Date.now() });
     } else if (area === '5') {
       const targetFl = ['1F', '2F', '3F', '4F', '5F', '6F', '7F'].includes(currentFloor) ? currentFloor : '1F';
       setCurrentFloor(targetFl);
-      setTeleportTarget({ coords: [-22, -18], ts: Date.now() });
+      setTeleportTarget({ coords: [-20, -18], ts: Date.now() });
     } else if (area === '4') {
       const targetFl = ['1F', '2F', '3F', '4F', '5F'].includes(currentFloor) ? currentFloor : '1F';
       setCurrentFloor(targetFl);
-      setTeleportTarget({ coords: [-98, -42], ts: Date.now() });
+      setTeleportTarget({ coords: [-96, -42], ts: Date.now() });
     }
   };
 
@@ -1191,12 +1193,12 @@ export default function ThreeCampusViewer({ onClose }) {
               有明キャンパス 配置マップ
             </h2>
             <p className="text-[10px] sm:text-xs text-emerald-300 font-semibold truncate">
-              現在地：{currentSubBldg} / {currentFloor}（回転: {rotationDeg}°）
+              現在地：{currentSubBldg} / {currentFloor}
             </p>
           </div>
         </div>
 
-        {/* ワンクリック移動＆回転ボタン */}
+        {/* ワンクリック移動ボタン */}
         <div className="hidden md:flex items-center gap-1.5 bg-slate-800 px-2 py-1 rounded-lg border border-slate-700">
           <button
             onClick={() => handleQuickJump('1-2-3-6')}
@@ -1208,7 +1210,7 @@ export default function ThreeCampusViewer({ onClose }) {
             onClick={() => handleQuickJump('signal')}
             className="px-2 py-0.5 rounded bg-slate-700 hover:bg-amber-600 text-[11px] font-bold transition"
           >
-            モニュメント広場・信号
+            信号・横断歩道
           </button>
           <button
             onClick={() => handleQuickJump('5')}
@@ -1222,30 +1224,16 @@ export default function ThreeCampusViewer({ onClose }) {
           >
             4号館
           </button>
-          <button
-            onClick={handleRotateCampus}
-            className="px-2.5 py-0.5 rounded bg-indigo-600 hover:bg-indigo-500 text-[11px] font-bold transition ml-1"
-          >
-            🔄 90°回転 ({rotationDeg}°)
-          </button>
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
           {isMobile && (
-            <>
-              <button
-                onClick={handleRotateCampus}
-                className="px-2 py-1.5 rounded-lg bg-indigo-700 text-xs font-bold text-white"
-              >
-                🔄 {rotationDeg}°
-              </button>
-              <button
-                onClick={() => setShowFloorMenu((prev) => !prev)}
-                className="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-600 text-xs font-bold text-slate-100 active:bg-slate-700"
-              >
-                階 ({currentFloor}) {showFloorMenu ? '▲' : '▼'}
-              </button>
-            </>
+            <button
+              onClick={() => setShowFloorMenu((prev) => !prev)}
+              className="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-600 text-xs font-bold text-slate-100 active:bg-slate-700"
+            >
+              階 ({currentFloor}) {showFloorMenu ? '▲' : '▼'}
+            </button>
           )}
           <button
             onClick={onClose}
@@ -1269,7 +1257,7 @@ export default function ThreeCampusViewer({ onClose }) {
             onClick={() => handleQuickJump('signal')}
             className="flex-1 py-1 rounded bg-slate-700 active:bg-amber-600 text-[10px] text-white font-bold"
           >
-            信号・横断歩道
+            信号前
           </button>
           <button
             onClick={() => handleQuickJump('5')}
@@ -1321,80 +1309,76 @@ export default function ThreeCampusViewer({ onClose }) {
             shadow-mapSize={[2048, 2048]}
           />
 
-          {/* キャンパス全体（回転ボタンで90度ずつ回転可能） */}
-          <group rotation={[0, (rotationDeg * Math.PI) / 180, 0]}>
-            <CampusScenery currentFloor={currentFloor} />
+          <CampusScenery currentFloor={currentFloor} />
 
-            {/* 各棟の歩行可能床面と外周壁・入口開口 */}
-            {unifiedFloorData.buildingZones?.map((zone, idx) => {
-              const zw = zone.maxX - zone.minX;
-              const zd = zone.maxZ - zone.minZ;
-              const zx = (zone.minX + zone.maxX) / 2;
-              const zz = (zone.minZ + zone.maxZ) / 2;
-              return (
-                <group key={`zone-${idx}`}>
-                  <mesh rotation={[-Math.PI / 2, 0, 0]} position={[zx, 0, zz]} receiveShadow>
-                    <planeGeometry args={[zw, zd]} />
-                    <meshStandardMaterial color={zone.floorColor || '#e2e8f0'} roughness={0.8} />
-                  </mesh>
-                  <gridHelper
-                    args={[Math.max(zw, zd), Math.round(Math.max(zw, zd) / 4), '#94a3b8', '#cbd5e1']}
-                    position={[zx, 0.01, zz]}
+          {/* 各棟の歩行可能床面と外周壁・入口開口 */}
+          {unifiedFloorData.buildingZones?.map((zone, idx) => {
+            const zw = zone.maxX - zone.minX;
+            const zd = zone.maxZ - zone.minZ;
+            const zx = (zone.minX + zone.maxX) / 2;
+            const zz = (zone.minZ + zone.maxZ) / 2;
+            return (
+              <group key={`zone-${idx}`}>
+                <mesh rotation={[-Math.PI / 2, 0, 0]} position={[zx, 0, zz]} receiveShadow>
+                  <planeGeometry args={[zw, zd]} />
+                  <meshStandardMaterial color={zone.floorColor || '#e2e8f0'} roughness={0.8} />
+                </mesh>
+                <gridHelper
+                  args={[Math.max(zw, zd), Math.round(Math.max(zw, zd) / 4), '#94a3b8', '#cbd5e1']}
+                  position={[zx, 0.01, zz]}
+                />
+                {!zone.isOutdoor && (
+                  <BuildingPerimeterWalls
+                    zone={zone}
+                    entrances={unifiedFloorData.entrances || []}
+                    isCurrentFloor={true}
                   />
-                  {!zone.isOutdoor && (
-                    <BuildingPerimeterWalls
-                      zone={zone}
-                      entrances={unifiedFloorData.entrances || []}
-                      isCurrentFloor={true}
-                    />
-                  )}
-                  <Html position={[zx, 0.15, zz]} center distanceFactor={40}>
-                    <div className="text-slate-600/70 font-black text-sm tracking-widest pointer-events-none select-none whitespace-nowrap">
-                      {zone.name}
-                    </div>
-                  </Html>
-                </group>
-              );
-            })}
+                )}
+                <Html position={[zx, 0.15, zz]} center distanceFactor={40}>
+                  <div className="text-slate-600/70 font-black text-sm tracking-widest pointer-events-none select-none whitespace-nowrap">
+                    {zone.name}
+                  </div>
+                </Html>
+              </group>
+            );
+          })}
 
-            {/* 1F入口・2F入口ゲートサイン */}
-            {unifiedFloorData.entrances?.map((ent, idx) => (
-              <EntranceGateMarker key={`ent-${idx}`} entrance={ent} />
-            ))}
+          {/* 1F入口・2F入口ゲートサイン */}
+          {unifiedFloorData.entrances?.map((ent, idx) => (
+            <EntranceGateMarker key={`ent-${idx}`} entrance={ent} />
+          ))}
 
-            {/* 吹き抜け */}
-            {unifiedFloorData.voids?.map((v, idx) => (
-              <VoidBox key={`void-${idx}`} voidArea={v} />
-            ))}
+          {/* 吹き抜け */}
+          {unifiedFloorData.voids?.map((v, idx) => (
+            <VoidBox key={`void-${idx}`} voidArea={v} />
+          ))}
 
-            {/* 教室ではない設備・オープンスペース（壁なし） */}
-            {unifiedFloorData.facilities?.map((fac) => (
-              <FacilityZone key={fac.id} facility={fac} />
-            ))}
+          {/* 教室ではない設備・オープンスペース（壁なし） */}
+          {unifiedFloorData.facilities?.map((fac) => (
+            <FacilityZone key={fac.id} facility={fac} />
+          ))}
 
-            {/* 教室・研究室・事務室（壁とドア付き） */}
-            {unifiedFloorData.rooms.map((room) => (
-              <RoomBox key={room.id} room={room} />
-            ))}
+          {/* 教室・研究室・事務室（壁とドア付き） */}
+          {unifiedFloorData.rooms.map((room) => (
+            <RoomBox key={room.id} room={room} />
+          ))}
 
-            {/* エレベーター */}
-            {unifiedFloorData.elevators.map((ev) => (
-              <ElevatorPad key={ev.id} ev={ev} isNear={nearElevator?.id === ev.id} />
-            ))}
+          {/* エレベーター */}
+          {unifiedFloorData.elevators.map((ev) => (
+            <ElevatorPad key={ev.id} ev={ev} isNear={nearElevator?.id === ev.id} />
+          ))}
 
-            <PlayerController
-              currentFloor={currentFloor}
-              unifiedFloorData={unifiedFloorData}
-              keysPressed={keysPressed}
-              joystickInput={joystickInput}
-              onNearElevatorChange={setNearElevator}
-              onCurrentBuildingChange={setCurrentSubBldg}
-              onFloorAutoSwitch={(nextFl) => setCurrentFloor(nextFl)}
-              teleportTarget={teleportTarget}
-              isPortrait={isPortrait}
-              rotationDeg={rotationDeg}
-            />
-          </group>
+          <PlayerController
+            currentFloor={currentFloor}
+            unifiedFloorData={unifiedFloorData}
+            keysPressed={keysPressed}
+            joystickInput={joystickInput}
+            onNearElevatorChange={setNearElevator}
+            onCurrentBuildingChange={setCurrentSubBldg}
+            onFloorAutoSwitch={(nextFl) => setCurrentFloor(nextFl)}
+            teleportTarget={teleportTarget}
+            isPortrait={isPortrait}
+          />
         </Canvas>
 
         {/* PC版：左上の操作ガイド & 階数クイック選択 */}
@@ -1407,7 +1391,7 @@ export default function ThreeCampusViewer({ onClose }) {
               <li><span className="font-bold text-white">W A S D / 矢印キー</span>：移動</li>
               <li><span className="font-bold text-white">🚪 1F入口 / 2F入口</span>：建物の出入り口</li>
               <li><span className="font-bold text-white">青い枠の部屋</span>：教室・研究室・事務室</li>
-              <li><span className="font-bold text-white">グレー床の表記</span>：トイレ・共用部（通過可）</li>
+              <li><span className="font-bold text-white">グレー床の表記</span>：ホール・階段・トイレ（通過可）</li>
             </ul>
             <div className="pt-2 border-t border-slate-700">
               <span className="text-[11px] text-slate-400 block mb-1.5">階数ダイレクト切替</span>

@@ -1,4 +1,4 @@
-// 有明キャンパス 3Dウォークスルー用 全館・全フロア統合データ（案内板準拠・教室/設備分離版）
+// 有明キャンパス 3Dウォークスルー用 全館・全フロア統合データ（5号館1F平面図・実測写真準拠）
 
 const UNIFIED_ROOM_COLOR = '#60a5fa';
 
@@ -83,7 +83,7 @@ function createBldg1LabFloor(floorNum, centerNorthRoom, south1005Room, hasVoid =
 
 export const CAMPUS_3D_BUILDINGS = {
   // =========================================================================
-  // 右側街区：1号館・2号館・3号館・6号館（案内板の配置そのまま）
+  // 右側街区：1号館・2号館・3号館・6号館
   // =========================================================================
   'area-1236': {
     id: 'area-1236',
@@ -97,7 +97,6 @@ export const CAMPUS_3D_BUILDINGS = {
           { name: '6号館', minX: 48, maxX: 80, minZ: -12, maxZ: 24, floorColor: '#e2e8f0' },
           { name: '3号館', minX: 44, maxX: 78, minZ: -54, maxZ: -18, floorColor: '#e2e8f0' },
         ],
-        // 部屋（教室・事務室・図書館・食堂・売店など壁のある部屋のみ）
         rooms: [
           // --- 1号館 1F ---
           { id: '1-health', name: '健康管理センター\n(保健室・学生相談室)', x: 18, z: 46, w: 11, d: 10, color: UNIFIED_ROOM_COLOR },
@@ -129,7 +128,6 @@ export const CAMPUS_3D_BUILDINGS = {
           { id: '3-shokudo', name: 'ありあけ食堂\n印刷・ブックセンター', x: 66, z: -49, w: 20, d: 8, color: UNIFIED_ROOM_COLOR },
           { id: '3-food', name: 'フードコート\n(大学食堂)', x: 66, z: -32, w: 20, d: 20, color: UNIFIED_ROOM_COLOR },
         ],
-        // 教室ではない設備・共用部（壁なし・通り抜け可）
         facilities: [
           { id: '1-vend', name: '自販機コーナー', x: 17, z: 33, w: 7, d: 5 },
           { id: '1-wc1', name: 'トイレ (W / M)', x: 34, z: 47, w: 8, d: 9 },
@@ -477,155 +475,175 @@ export const CAMPUS_3D_BUILDINGS = {
   },
 
   // =========================================================================
-  // 左側街区（東側）：5号館（信号・横断歩道のすぐ前に南東1F入口）
+  // 左側街区（東側）：5号館（1F平面図・内部/外観写真完全準拠）
+  // 東端 X=-16（大通り・信号側）、西端 X=-52（4号館側）
+  // 北端 Z=-48（センタープロムナード・芝生広場側）、南端 Z=-14
   // =========================================================================
   'area-5': {
     id: 'area-5',
     name: '5号館（1F〜7F）',
     floors: {
       '1F': {
-        spawn: [-24, -22],
+        spawn: [-19, -18],
         buildingZones: [
           { name: '5号館', minX: -52, maxX: -16, minZ: -48, maxZ: -14, floorColor: '#e2e8f0' },
         ],
+        // 壁で囲まれた部屋（教室・事務室・風除室・多目的スペース）
         rooms: [
-          // 南東角（X=-24〜-16, Z=-24〜-14）は信号前1F入口エントランスホールとして開放
-          { id: '5-multi1', name: '多目的スペース1', x: -24, z: -40, w: 12, d: 10, color: UNIFIED_ROOM_COLOR },
-          { id: '5-keibi', name: '警備準備室', x: -34, z: -34, w: 6, d: 7, color: UNIFIED_ROOM_COLOR },
-          { id: '5-presen', name: 'プレゼンテーション\nスペース', x: -44, z: -26, w: 12, d: 14, color: UNIFIED_ROOM_COLOR },
-          { id: '5-101', name: '5-101 教室', x: -34, z: -18, w: 16, d: 8, color: UNIFIED_ROOM_COLOR },
+          // 信号前1F入口（平面図左上・赤丸の風除室）
+          { id: '5-fujo-se', name: '風除室\n(信号前1F入口)', x: -18.5, z: -16.5, w: 5, d: 5, color: UNIFIED_ROOM_COLOR },
+          // 北側1F入口（平面図下中央・芝生広場側の風除室）
+          { id: '5-fujo-n', name: '風除室\n(北側1F入口)', x: -34, z: -45.5, w: 5, d: 5, color: UNIFIED_ROOM_COLOR },
+          // 南西側 多目的スペース1（平面図右上）
+          { id: '5-multi1', name: '多目的スペース1', x: -41, z: -18.5, w: 10, d: 9, color: UNIFIED_ROOM_COLOR },
+          // 中央 警備準備室
+          { id: '5-keibi', name: '警備準備室', x: -35, z: -24.5, w: 5, d: 4.5, color: UNIFIED_ROOM_COLOR },
+          // 北西側（4号館側）5-101 教室
+          { id: '5-101', name: '5-101 教室', x: -42, z: -39.5, w: 16, d: 7, color: UNIFIED_ROOM_COLOR },
         ],
+        // 壁なし・オープンスペース＆共用設備（平面図・内部写真準拠）
         facilities: [
-          { id: '5-wc1', name: 'トイレ (M / W)', x: -31, z: -26, w: 9, d: 7 },
+          // 東側（大通り窓ガラス沿い）全面の学生ホール
+          { id: '5-hall1', name: '学生ホール（吹き抜けラウンジ）', x: -20.5, z: -32, w: 8, d: 24 },
+          // 学生ホール中央のプレゼンテーションスペース
+          { id: '5-presen', name: 'プレゼンテーションスペース', x: -29.5, z: -32, w: 8, d: 11 },
+          // 南側 階段（1F→2F）
+          { id: '5-stair-s', name: '階段（1F⇔2F）', x: -23.5, z: -17, w: 4.5, d: 6 },
+          // 中央 トイレ（M / W / 多目的）
+          { id: '5-wc1', name: 'トイレ (M / W / 多目的)', x: -39, z: -32, w: 10, d: 7 },
+          // 西側 ピロティ駐車場
+          { id: '5-park1', name: '駐車場（ピロティ）', x: -49, z: -25, w: 5, d: 14 },
+          // 北西 屋外階段
+          { id: '5-stair-nw', name: '屋外階段（2Fデッキへ）', x: -46, z: -45.5, w: 8, d: 4 },
         ],
         elevators: [
-          { id: 'ev-5-1f', name: '5号館 EVホール', x: -42, z: -42, targets: ['1F', '2F', '3F', '4F', '5F', '6F', '7F'] },
+          { id: 'ev-5-1f', name: '5号館 EVホール', x: -31, z: -17.5, targets: ['1F', '2F', '3F', '4F', '5F', '6F', '7F'] },
         ],
       },
 
       '2F': {
-        spawn: [-36, -38],
+        spawn: [-31, -22],
         buildingZones: [
           { name: '5号館', minX: -52, maxX: -16, minZ: -48, maxZ: -14, floorColor: '#e2e8f0' },
         ],
         voids: [
-          { name: '吹き抜け（1Fホール上部）', x: -43, z: -26, w: 14, d: 18 },
+          { name: '吹き抜け（1F学生ホール上部）', x: -20.5, z: -32, w: 8, d: 24 },
         ],
         rooms: [
-          { id: '5-201', name: '5-201 教室', x: -24, z: -33, w: 14, d: 8, color: UNIFIED_ROOM_COLOR },
-          { id: '5-202', name: '5-202\nアジアAI研究所', x: -24, z: -25, w: 14, d: 7, color: UNIFIED_ROOM_COLOR },
-          { id: '5-203', name: '5-203 共同研究室', x: -24, z: -18, w: 14, d: 7, color: UNIFIED_ROOM_COLOR },
+          { id: '5-201', name: '5-201 教室', x: -44, z: -23, w: 14, d: 8, color: UNIFIED_ROOM_COLOR },
+          { id: '5-202', name: '5-202\nアジアAI研究所', x: -44, z: -31, w: 14, d: 7, color: UNIFIED_ROOM_COLOR },
+          { id: '5-203', name: '5-203 共同研究室', x: -44, z: -39, w: 14, d: 8, color: UNIFIED_ROOM_COLOR },
         ],
         facilities: [
-          { id: '5-wc2', name: 'トイレ (M / W)', x: -24, z: -43, w: 12, d: 7 },
+          { id: '5-wc2', name: 'トイレ (M / W)', x: -39, z: -32, w: 10, d: 7 },
         ],
         elevators: [
-          { id: 'ev-5-2f', name: '5号館 EVホール', x: -42, z: -42, targets: ['1F', '2F', '3F', '4F', '5F', '6F', '7F'] },
+          { id: 'ev-5-2f', name: '5号館 EVホール', x: -31, z: -17.5, targets: ['1F', '2F', '3F', '4F', '5F', '6F', '7F'] },
         ],
       },
 
       '3F': {
-        spawn: [-36, -38],
+        spawn: [-31, -22],
         buildingZones: [
           { name: '5号館', minX: -52, maxX: -16, minZ: -48, maxZ: -14, floorColor: '#e2e8f0' },
         ],
         rooms: [
-          { id: '5-301', name: '5-301 教室', x: -44, z: -28, w: 14, d: 18, color: UNIFIED_ROOM_COLOR },
-          { id: '5-302', name: '5-302 教室', x: -24, z: -33, w: 14, d: 7, color: UNIFIED_ROOM_COLOR },
-          { id: '5-303', name: '5-303 教室', x: -24, z: -25.5, w: 14, d: 7, color: UNIFIED_ROOM_COLOR },
-          { id: '5-304', name: '5-304 教室', x: -24, z: -18, w: 14, d: 7, color: UNIFIED_ROOM_COLOR },
+          { id: '5-301', name: '5-301 教室', x: -22, z: -32, w: 11, d: 20, color: UNIFIED_ROOM_COLOR },
+          { id: '5-302', name: '5-302 教室', x: -44, z: -23, w: 14, d: 7, color: UNIFIED_ROOM_COLOR },
+          { id: '5-303', name: '5-303 教室', x: -44, z: -31, w: 14, d: 7, color: UNIFIED_ROOM_COLOR },
+          { id: '5-304', name: '5-304 教室', x: -44, z: -39, w: 14, d: 7, color: UNIFIED_ROOM_COLOR },
         ],
         facilities: [
-          { id: '5-wc3', name: 'トイレ (M / W)', x: -24, z: -43, w: 12, d: 7 },
-          { id: '5-terrace3', name: '交流テラス 31', x: -42, z: -16.5, w: 18, d: 5 },
+          { id: '5-wc3', name: 'トイレ (M / W)', x: -39, z: -32, w: 10, d: 7 },
+          { id: '5-terrace3', name: '交流テラス 31', x: -24, z: -45, w: 14, d: 5 },
         ],
         elevators: [
-          { id: 'ev-5-3f', name: '5号館 EVホール', x: -42, z: -42, targets: ['1F', '2F', '3F', '4F', '5F', '6F', '7F'] },
+          { id: 'ev-5-3f', name: '5号館 EVホール', x: -31, z: -17.5, targets: ['1F', '2F', '3F', '4F', '5F', '6F', '7F'] },
         ],
       },
 
       '4F': {
-        spawn: [-36, -38],
+        spawn: [-31, -22],
         buildingZones: [
           { name: '5号館', minX: -52, maxX: -16, minZ: -48, maxZ: -14, floorColor: '#e2e8f0' },
         ],
         rooms: [
-          { id: '5-401', name: '5-401 教室', x: -44, z: -33, w: 14, d: 9, color: UNIFIED_ROOM_COLOR },
-          { id: '5-402', name: '5-402 教室', x: -44, z: -23, w: 14, d: 9, color: UNIFIED_ROOM_COLOR },
-          { id: '5-403', name: '5-403 教室', x: -24, z: -33, w: 14, d: 7, color: UNIFIED_ROOM_COLOR },
-          { id: '5-404', name: '5-404 教室', x: -24, z: -25.5, w: 14, d: 7, color: UNIFIED_ROOM_COLOR },
-          { id: '5-405', name: '5-405 教室', x: -24, z: -18, w: 14, d: 7, color: UNIFIED_ROOM_COLOR },
+          { id: '5-401', name: '5-401 教室', x: -22, z: -26, w: 11, d: 10, color: UNIFIED_ROOM_COLOR },
+          { id: '5-402', name: '5-402 教室', x: -22, z: -37, w: 11, d: 10, color: UNIFIED_ROOM_COLOR },
+          { id: '5-403', name: '5-403 教室', x: -44, z: -23, w: 14, d: 7, color: UNIFIED_ROOM_COLOR },
+          { id: '5-404', name: '5-404 教室', x: -44, z: -31, w: 14, d: 7, color: UNIFIED_ROOM_COLOR },
+          { id: '5-405', name: '5-405 教室', x: -44, z: -39, w: 14, d: 7, color: UNIFIED_ROOM_COLOR },
         ],
         facilities: [
-          { id: '5-wc4', name: 'トイレ (M / W)', x: -24, z: -43, w: 12, d: 7 },
-          { id: '5-terrace4', name: '交流テラス 41', x: -42, z: -16.5, w: 18, d: 5 },
+          { id: '5-wc4', name: 'トイレ (M / W)', x: -39, z: -32, w: 10, d: 7 },
+          { id: '5-terrace4', name: '交流テラス 41', x: -24, z: -45, w: 14, d: 5 },
         ],
         elevators: [
-          { id: 'ev-5-4f', name: '5号館 EVホール', x: -42, z: -42, targets: ['1F', '2F', '3F', '4F', '5F', '6F', '7F'] },
+          { id: 'ev-5-4f', name: '5号館 EVホール', x: -31, z: -17.5, targets: ['1F', '2F', '3F', '4F', '5F', '6F', '7F'] },
         ],
       },
 
       '5F': {
-        spawn: [-36, -38],
+        spawn: [-31, -22],
         buildingZones: [
           { name: '5号館', minX: -52, maxX: -16, minZ: -48, maxZ: -14, floorColor: '#e2e8f0' },
         ],
         rooms: [
-          { id: '5-501', name: '5-501 アクティブ\nラーニング教室', x: -44, z: -33, w: 14, d: 9, color: UNIFIED_ROOM_COLOR },
-          { id: '5-502', name: '5-502 アクティブ\nラーニング教室', x: -44, z: -23, w: 14, d: 9, color: UNIFIED_ROOM_COLOR },
-          { id: '5-503', name: '5-503 教室', x: -24, z: -33, w: 14, d: 7, color: UNIFIED_ROOM_COLOR },
-          { id: '5-504', name: '5-504 教室', x: -24, z: -25.5, w: 14, d: 7, color: UNIFIED_ROOM_COLOR },
-          { id: '5-505', name: '5-505 教室', x: -24, z: -18, w: 14, d: 7, color: UNIFIED_ROOM_COLOR },
+          { id: '5-501', name: '5-501 アクティブ\nラーニング教室', x: -22, z: -26, w: 11, d: 10, color: UNIFIED_ROOM_COLOR },
+          { id: '5-502', name: '5-502 アクティブ\nラーニング教室', x: -22, z: -37, w: 11, d: 10, color: UNIFIED_ROOM_COLOR },
+          { id: '5-503', name: '5-503 教室', x: -44, z: -23, w: 14, d: 7, color: UNIFIED_ROOM_COLOR },
+          { id: '5-504', name: '5-504 教室', x: -44, z: -31, w: 14, d: 7, color: UNIFIED_ROOM_COLOR },
+          { id: '5-505', name: '5-505 教室', x: -44, z: -39, w: 14, d: 7, color: UNIFIED_ROOM_COLOR },
         ],
         facilities: [
-          { id: '5-wc5', name: 'トイレ (M / W)', x: -24, z: -43, w: 12, d: 7 },
-          { id: '5-terrace5', name: '交流テラス 51', x: -42, z: -16.5, w: 18, d: 5 },
+          { id: '5-wc5', name: 'トイレ (M / W)', x: -39, z: -32, w: 10, d: 7 },
+          { id: '5-terrace5', name: '交流テラス 51', x: -24, z: -45, w: 14, d: 5 },
         ],
         elevators: [
-          { id: 'ev-5-5f', name: '5号館 EVホール', x: -42, z: -42, targets: ['1F', '2F', '3F', '4F', '5F', '6F', '7F'] },
+          { id: 'ev-5-5f', name: '5号館 EVホール', x: -31, z: -17.5, targets: ['1F', '2F', '3F', '4F', '5F', '6F', '7F'] },
         ],
       },
 
       '6F': {
-        spawn: [-34, -30],
+        spawn: [-31, -22],
         buildingZones: [
           { name: '5号館', minX: -52, maxX: -16, minZ: -48, maxZ: -14, floorColor: '#e2e8f0' },
         ],
         rooms: [
-          { id: '5-6w', name: '5-601 印刷室\n5-602〜5-610 研究室', x: -47, z: -28, w: 9, d: 22, color: UNIFIED_ROOM_COLOR },
-          { id: '5-6e', name: '5-611〜5-620 研究室', x: -21, z: -28, w: 9, d: 22, color: UNIFIED_ROOM_COLOR },
+          { id: '5-6e', name: '5-601 印刷室\n5-602〜5-610 研究室', x: -21, z: -31, w: 9, d: 22, color: UNIFIED_ROOM_COLOR },
+          { id: '5-6w', name: '5-611〜5-620 研究室', x: -47, z: -31, w: 9, d: 22, color: UNIFIED_ROOM_COLOR },
         ],
         facilities: [
-          { id: '5-wc6', name: 'トイレ (M / W)・給湯室', x: -24, z: -43, w: 12, d: 7 },
-          { id: '5-terrace6', name: '交流テラス 61', x: -42, z: -16.5, w: 18, d: 5 },
+          { id: '5-wc6', name: 'トイレ (M / W)・給湯室', x: -39, z: -32, w: 10, d: 7 },
+          { id: '5-terrace6', name: '交流テラス 61', x: -24, z: -45, w: 14, d: 5 },
         ],
         elevators: [
-          { id: 'ev-5-6f', name: '5号館 EVホール', x: -42, z: -42, targets: ['1F', '2F', '3F', '4F', '5F', '6F', '7F'] },
+          { id: 'ev-5-6f', name: '5号館 EVホール', x: -31, z: -17.5, targets: ['1F', '2F', '3F', '4F', '5F', '6F', '7F'] },
         ],
       },
 
       '7F': {
-        spawn: [-34, -34],
+        spawn: [-31, -22],
         buildingZones: [
           { name: '5号館', minX: -52, maxX: -16, minZ: -48, maxZ: -14, floorColor: '#dcfce7' },
         ],
         rooms: [
-          { id: '5-multi2', name: '多目的スペース2', x: -40, z: -27, w: 13, d: 15, color: UNIFIED_ROOM_COLOR },
+          { id: '5-multi2', name: '多目的スペース2', x: -26, z: -31, w: 13, d: 15, color: UNIFIED_ROOM_COLOR },
         ],
         facilities: [
-          { id: '5-wc7', name: 'トイレ (M / W)', x: -24, z: -43, w: 12, d: 7 },
-          { id: '5-roof7', name: '5号館 屋上庭園（オープンスペース）', x: -24, z: -27, w: 13, d: 20 },
-          { id: '5-terrace7', name: '交流テラス 71', x: -42, z: -16.5, w: 18, d: 5 },
+          { id: '5-wc7', name: 'トイレ (M / W)', x: -39, z: -32, w: 10, d: 7 },
+          { id: '5-roof7', name: '5号館 屋上庭園（オープンスペース）', x: -43, z: -31, w: 13, d: 20 },
+          { id: '5-terrace7', name: '交流テラス 71', x: -24, z: -45, w: 14, d: 5 },
         ],
         elevators: [
-          { id: 'ev-5-7f', name: '5号館 EVホール', x: -42, z: -42, targets: ['1F', '2F', '3F', '4F', '5F', '6F', '7F'] },
+          { id: 'ev-5-7f', name: '5号館 EVホール', x: -31, z: -17.5, targets: ['1F', '2F', '3F', '4F', '5F', '6F', '7F'] },
         ],
       },
     },
   },
 
   // =========================================================================
-  // 左側街区（西側）：4号館（5号館の西隣・北側センタープロムナードに入口）
+  // 左側街区（西側）：4号館（5号館のすぐ西隣・北側センタープロムナードに入口）
   // =========================================================================
   'area-4': {
     id: 'area-4',
@@ -634,103 +652,103 @@ export const CAMPUS_3D_BUILDINGS = {
       '1F': {
         spawn: [-98, -42],
         buildingZones: [
-          { name: '4号館', minX: -114, maxX: -58, minZ: -48, maxZ: -14, floorColor: '#e2e8f0' },
+          { name: '4号館', minX: -114, maxX: -56, minZ: -48, maxZ: -14, floorColor: '#e2e8f0' },
         ],
         rooms: [
-          { id: '4-1-lab1', name: '実験・実習エリア（東）', x: -68, z: -24, w: 18, d: 16, color: UNIFIED_ROOM_COLOR },
-          { id: '4-1-lab2', name: '実験・実習エリア（西）', x: -102, z: -24, w: 20, d: 16, color: UNIFIED_ROOM_COLOR },
+          { id: '4-1-lab1', name: '実験・実習エリア（東）', x: -67, z: -24, w: 18, d: 16, color: UNIFIED_ROOM_COLOR },
+          { id: '4-1-lab2', name: '実験・実習エリア（西）', x: -101, z: -24, w: 20, d: 16, color: UNIFIED_ROOM_COLOR },
         ],
         facilities: [
-          { id: '4-1-hall', name: '1F エントランスホール', x: -86, z: -41, w: 24, d: 10 },
-          { id: '4-1-wc', name: 'トイレ (M / W)', x: -86, z: -24, w: 10, d: 12 },
+          { id: '4-1-hall', name: '1F エントランスホール', x: -85, z: -41, w: 24, d: 10 },
+          { id: '4-1-wc', name: 'トイレ (M / W)', x: -85, z: -24, w: 10, d: 12 },
         ],
         elevators: [
-          { id: 'ev-4-1f', name: '4号館 EV', x: -82, z: -34, targets: ['1F', '2F', '3F', '4F', '5F'] },
+          { id: 'ev-4-1f', name: '4号館 EV', x: -81, z: -34, targets: ['1F', '2F', '3F', '4F', '5F'] },
         ],
       },
 
       '2F': {
         spawn: [-76, -42],
         buildingZones: [
-          { name: '4号館', minX: -114, maxX: -58, minZ: -48, maxZ: -14, floorColor: '#e2e8f0' },
+          { name: '4号館', minX: -114, maxX: -56, minZ: -48, maxZ: -14, floorColor: '#e2e8f0' },
         ],
         rooms: [
-          { id: '4-proj', name: 'プロジェクトルーム', x: -66, z: -42, w: 14, d: 9, color: UNIFIED_ROOM_COLOR },
-          { id: '4-math-lab', name: '数理工学\n計算機実験室', x: -64, z: -31, w: 10, d: 11, color: UNIFIED_ROOM_COLOR },
-          { id: '4-hall2', name: '学生ホール', x: -72, z: -25, w: 10, d: 11, color: UNIFIED_ROOM_COLOR },
-          { id: '4-career', name: 'キャリアセンター\n支援課・相談ブース', x: -70, z: -17, w: 22, d: 6, color: UNIFIED_ROOM_COLOR },
-          { id: '4-201-5', name: '4-201〜4-205 研究室', x: -94, z: -26, w: 12, d: 6, color: UNIFIED_ROOM_COLOR },
-          { id: '4-206-10', name: '4-206〜4-210 研究室', x: -107, z: -26, w: 14, d: 6, color: UNIFIED_ROOM_COLOR },
+          { id: '4-proj', name: 'プロジェクトルーム', x: -65, z: -42, w: 14, d: 9, color: UNIFIED_ROOM_COLOR },
+          { id: '4-math-lab', name: '数理工学\n計算機実験室', x: -63, z: -31, w: 10, d: 11, color: UNIFIED_ROOM_COLOR },
+          { id: '4-hall2', name: '学生ホール', x: -71, z: -25, w: 10, d: 11, color: UNIFIED_ROOM_COLOR },
+          { id: '4-career', name: 'キャリアセンター\n支援課・相談ブース', x: -69, z: -17, w: 22, d: 6, color: UNIFIED_ROOM_COLOR },
+          { id: '4-201-5', name: '4-201〜4-205 研究室', x: -93, z: -26, w: 12, d: 6, color: UNIFIED_ROOM_COLOR },
+          { id: '4-206-10', name: '4-206〜4-210 研究室', x: -106, z: -26, w: 14, d: 6, color: UNIFIED_ROOM_COLOR },
         ],
         facilities: [
-          { id: '4-soko2', name: '倉庫', x: -76, z: -42, w: 7, d: 9 },
-          { id: '4-wc2', name: 'トイレ (M / W)', x: -94, z: -35, w: 10, d: 6 },
+          { id: '4-soko2', name: '倉庫', x: -75, z: -42, w: 7, d: 9 },
+          { id: '4-wc2', name: 'トイレ (M / W)', x: -93, z: -35, w: 10, d: 6 },
         ],
         elevators: [
-          { id: 'ev-4-2f', name: '4号館 EV', x: -82, z: -34, targets: ['1F', '2F', '3F', '4F', '5F'] },
+          { id: 'ev-4-2f', name: '4号館 EV', x: -81, z: -34, targets: ['1F', '2F', '3F', '4F', '5F'] },
         ],
       },
 
       '3F': {
         spawn: [-86, -28],
         buildingZones: [
-          { name: '4号館', minX: -114, maxX: -58, minZ: -48, maxZ: -14, floorColor: '#e2e8f0' },
+          { name: '4号館', minX: -114, maxX: -56, minZ: -48, maxZ: -14, floorColor: '#e2e8f0' },
         ],
         rooms: [
-          { id: '4-301', name: '4-301 教室', x: -70, z: -42, w: 22, d: 9, color: UNIFIED_ROOM_COLOR },
-          { id: '4-302', name: '4-302 教室', x: -64, z: -32, w: 11, d: 9, color: UNIFIED_ROOM_COLOR },
-          { id: '4-306', name: '4-306 教室', x: -104, z: -20, w: 18, d: 11, color: UNIFIED_ROOM_COLOR },
-          { id: '4-305', name: '4-305 教室', x: -89, z: -20, w: 11, d: 11, color: UNIFIED_ROOM_COLOR },
-          { id: '4-304', name: '4-304 研究室', x: -80, z: -20, w: 6, d: 11, color: UNIFIED_ROOM_COLOR },
-          { id: '4-303', name: '4-303 教室', x: -68, z: -20, w: 17, d: 11, color: UNIFIED_ROOM_COLOR },
+          { id: '4-301', name: '4-301 教室', x: -69, z: -42, w: 22, d: 9, color: UNIFIED_ROOM_COLOR },
+          { id: '4-302', name: '4-302 教室', x: -63, z: -32, w: 11, d: 9, color: UNIFIED_ROOM_COLOR },
+          { id: '4-306', name: '4-306 教室', x: -103, z: -20, w: 18, d: 11, color: UNIFIED_ROOM_COLOR },
+          { id: '4-305', name: '4-305 教室', x: -88, z: -20, w: 11, d: 11, color: UNIFIED_ROOM_COLOR },
+          { id: '4-304', name: '4-304 研究室', x: -79, z: -20, w: 6, d: 11, color: UNIFIED_ROOM_COLOR },
+          { id: '4-303', name: '4-303 教室', x: -67, z: -20, w: 17, d: 11, color: UNIFIED_ROOM_COLOR },
         ],
         facilities: [
-          { id: '4-wc3', name: 'トイレ (M / W)', x: -94, z: -35, w: 10, d: 6 },
+          { id: '4-wc3', name: 'トイレ (M / W)', x: -93, z: -35, w: 10, d: 6 },
         ],
         elevators: [
-          { id: 'ev-4-3f', name: '4号館 EV', x: -82, z: -34, targets: ['1F', '2F', '3F', '4F', '5F'] },
+          { id: 'ev-4-3f', name: '4号館 EV', x: -81, z: -34, targets: ['1F', '2F', '3F', '4F', '5F'] },
         ],
       },
 
       '4F': {
         spawn: [-86, -28],
         buildingZones: [
-          { name: '4号館', minX: -114, maxX: -58, minZ: -48, maxZ: -14, floorColor: '#e2e8f0' },
+          { name: '4号館', minX: -114, maxX: -56, minZ: -48, maxZ: -14, floorColor: '#e2e8f0' },
         ],
         rooms: [
-          { id: '4-401', name: '4-401 科学実験室', x: -74, z: -42, w: 11, d: 9, color: UNIFIED_ROOM_COLOR },
-          { id: '4-402', name: '4-402 科学実験室', x: -64, z: -42, w: 9, d: 9, color: UNIFIED_ROOM_COLOR },
-          { id: '4-prep4', name: '実験準備室・印刷室', x: -64, z: -32, w: 11, d: 9, color: UNIFIED_ROOM_COLOR },
-          { id: '4-412', name: '4-412 教室', x: -108, z: -20, w: 11, d: 11, color: UNIFIED_ROOM_COLOR },
-          { id: '4-411', name: '4-411 教室', x: -96, z: -20, w: 11, d: 11, color: UNIFIED_ROOM_COLOR },
-          { id: '4-410', name: '4-410 教室', x: -86, z: -20, w: 8, d: 11, color: UNIFIED_ROOM_COLOR },
-          { id: '4-405', name: '4-405 サステナビリティ研究所', x: -77, z: -20, w: 9, d: 11, color: UNIFIED_ROOM_COLOR },
-          { id: '4-404', name: '4-404 数理工学センター', x: -69, z: -20, w: 6, d: 11, color: UNIFIED_ROOM_COLOR },
-          { id: '4-403', name: '4-403 教室', x: -62, z: -20, w: 7, d: 11, color: UNIFIED_ROOM_COLOR },
+          { id: '4-401', name: '4-401 科学実験室', x: -73, z: -42, w: 11, d: 9, color: UNIFIED_ROOM_COLOR },
+          { id: '4-402', name: '4-402 科学実験室', x: -63, z: -42, w: 9, d: 9, color: UNIFIED_ROOM_COLOR },
+          { id: '4-prep4', name: '実験準備室・印刷室', x: -63, z: -32, w: 11, d: 9, color: UNIFIED_ROOM_COLOR },
+          { id: '4-412', name: '4-412 教室', x: -107, z: -20, w: 11, d: 11, color: UNIFIED_ROOM_COLOR },
+          { id: '4-411', name: '4-411 教室', x: -95, z: -20, w: 11, d: 11, color: UNIFIED_ROOM_COLOR },
+          { id: '4-410', name: '4-410 教室', x: -85, z: -20, w: 8, d: 11, color: UNIFIED_ROOM_COLOR },
+          { id: '4-405', name: '4-405 サステナビリティ研究所', x: -76, z: -20, w: 9, d: 11, color: UNIFIED_ROOM_COLOR },
+          { id: '4-404', name: '4-404 数理工学センター', x: -68, z: -20, w: 6, d: 11, color: UNIFIED_ROOM_COLOR },
+          { id: '4-403', name: '4-403 教室', x: -61, z: -20, w: 7, d: 11, color: UNIFIED_ROOM_COLOR },
         ],
         facilities: [
-          { id: '4-wc4', name: '給湯室・トイレ (M / W)', x: -96, z: -35, w: 13, d: 6 },
+          { id: '4-wc4', name: '給湯室・トイレ (M / W)', x: -95, z: -35, w: 13, d: 6 },
         ],
         elevators: [
-          { id: 'ev-4-4f', name: '4号館 EV', x: -82, z: -34, targets: ['1F', '2F', '3F', '4F', '5F'] },
+          { id: 'ev-4-4f', name: '4号館 EV', x: -81, z: -34, targets: ['1F', '2F', '3F', '4F', '5F'] },
         ],
       },
 
       '5F': {
         spawn: [-86, -28],
         buildingZones: [
-          { name: '4号館', minX: -114, maxX: -58, minZ: -48, maxZ: -14, floorColor: '#e2e8f0' },
+          { name: '4号館', minX: -114, maxX: -56, minZ: -48, maxZ: -14, floorColor: '#e2e8f0' },
         ],
         rooms: [
-          { id: '4-501', name: '4-501 研究室', x: -71, z: -35, w: 11, d: 6, color: UNIFIED_ROOM_COLOR },
-          { id: '4-512-7', name: '4-512〜4-507 研究室（西側）', x: -100, z: -20, w: 26, d: 11, color: UNIFIED_ROOM_COLOR },
-          { id: '4-506-2', name: '4-506〜4-502 研究室（東側）', x: -72, z: -20, w: 26, d: 11, color: UNIFIED_ROOM_COLOR },
+          { id: '4-501', name: '4-501 研究室', x: -70, z: -35, w: 11, d: 6, color: UNIFIED_ROOM_COLOR },
+          { id: '4-512-7', name: '4-512〜4-507 研究室（西側）', x: -99, z: -20, w: 26, d: 11, color: UNIFIED_ROOM_COLOR },
+          { id: '4-506-2', name: '4-506〜4-502 研究室（東側）', x: -71, z: -20, w: 26, d: 11, color: UNIFIED_ROOM_COLOR },
         ],
         facilities: [
-          { id: '4-wc5', name: '給湯室・トイレ (M / W)', x: -96, z: -35, w: 13, d: 6 },
+          { id: '4-wc5', name: '給湯室・トイレ (M / W)', x: -95, z: -35, w: 13, d: 6 },
         ],
         elevators: [
-          { id: 'ev-4-5f', name: '4号館 EV', x: -82, z: -34, targets: ['1F', '2F', '3F', '4F', '5F'] },
+          { id: 'ev-4-5f', name: '4号館 EV', x: -81, z: -34, targets: ['1F', '2F', '3F', '4F', '5F'] },
         ],
       },
     },
