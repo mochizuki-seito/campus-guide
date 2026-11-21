@@ -4,9 +4,9 @@ import { OrbitControls, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { CAMPUS_3D_BUILDINGS } from '../data/campus3dData';
 
-// 4号館・5号館のワールド座標オフセット（2号館側＝西側の大通り向こうに配置）
-const BLDG4_OFFSET = { x: -116, z: 22 };
-const BLDG5_OFFSET = { x: -116, z: -20 };
+// 案内板準拠：大通りの西側に5号館、そのさらに西隣に4号館を配置
+const BLDG5_OFFSET = { x: -94, z: -26 };
+const BLDG4_OFFSET = { x: -152, z: -26 };
 
 // スマホ用 360度バーチャルスティック
 function VirtualJoystick({ joystickRef }) {
@@ -88,7 +88,7 @@ function VirtualJoystick({ joystickRef }) {
   );
 }
 
-// 教室を外壁・隣室とピタッと密着させ、廊下側に入り口（ドア）を設定するヘルパー
+// 教室を外壁・隣室と密着させ、廊下側に入り口（ドア）を設定するヘルパー
 function buildConnectedRooms(rawRooms, buildingZones) {
   if (!rawRooms || rawRooms.length === 0) return [];
 
@@ -118,7 +118,6 @@ function buildConnectedRooms(rawRooms, buildingZones) {
     return { ...r, minX, maxX, minZ, maxZ, zone };
   });
 
-  // 隣り合う教室同士の小さな隙間を埋めて密着させる
   for (let i = 0; i < boxes.length; i++) {
     for (let j = i + 1; j < boxes.length; j++) {
       const a = boxes[i];
@@ -159,7 +158,6 @@ function buildConnectedRooms(rawRooms, buildingZones) {
     }
   }
 
-  // 廊下に面している辺を判定してドア開口を設定
   return boxes.map((box, idx) => {
     const x = (box.minX + box.maxX) / 2;
     const z = (box.minZ + box.maxZ) / 2;
@@ -278,7 +276,7 @@ function BrickArchFacade({ position, rotation = [0, 0, 0], count = 4, width = 3.
   );
 }
 
-// キャンパス外観・中庭・屋外階段B・正門デッキ下ピロティ通り道・大通り・4号館＆5号館
+// キャンパス外観・中庭・屋外階段B・ピロティ通り道・大通り・5号館＆4号館
 function CampusScenery({ currentFloor, insideGroup }) {
   const floorNum = parseInt(currentFloor.replace('F', ''), 10) || 1;
   const groundY = -(floorNum - 1) * 3.4;
@@ -290,81 +288,94 @@ function CampusScenery({ currentFloor, insideGroup }) {
   return (
     <group>
       {/* 広大な緑地ベース */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-45, groundY - 0.18, 0]} receiveShadow>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-65, groundY - 0.18, 0]} receiveShadow>
         <planeGeometry args={[560, 560]} />
         <meshStandardMaterial color="#86efac" roughness={0.95} />
       </mesh>
 
       {/* メインキャンパス（1・2・3・6号館）敷地舗装 */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-5, groundY - 0.1, 0]} receiveShadow>
-        <planeGeometry args={[102, 118]} />
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-3, groundY - 0.1, 0]} receiveShadow>
+        <planeGeometry args={[94, 114]} />
         <meshStandardMaterial color="#d6d3d1" roughness={0.85} />
       </mesh>
 
-      {/* 西側キャンパス（4・5号館）敷地舗装 */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-116, groundY - 0.1, 0]} receiveShadow>
-        <planeGeometry args={[68, 108]} />
+      {/* 西側キャンパス（5・4号館）敷地舗装（案内板準拠） */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-126, groundY - 0.1, -24]} receiveShadow>
+        <planeGeometry args={[124, 62]} />
         <meshStandardMaterial color="#d6d3d1" roughness={0.85} />
       </mesh>
 
       {/* =================================================================== */}
-      {/* 1. 中庭（パティオ）のレンガ舗装遊歩道＆屋外階段B・ピロティ通り道       */}
+      {/* 1. 中庭（パティオ）のレンガ舗装・点字ブロック＆屋外階段B・ピロティ     */}
       {/* =================================================================== */}
       {/* 中庭中央の赤茶色レンガタイル遊歩道 */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-3, groundY - 0.03, 7]} receiveShadow>
-        <planeGeometry args={[8.5, 38]} />
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-4, groundY - 0.03, 6]} receiveShadow>
+        <planeGeometry args={[10, 40]} />
         <meshStandardMaterial color="#9a3412" roughness={0.85} />
       </mesh>
 
-      {/* 屋外階段Bの西側から5号館方面へ抜けるピロティ通り道（白タイル＋レンガ帯） */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-26, groundY - 0.02, -19]} receiveShadow>
-        <planeGeometry args={[48, 14]} />
+      {/* 現地写真準拠：ピロティ通り道〜モニュメント広場〜横断歩道への白タイル＆誘導点字ブロック */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-22, groundY - 0.02, -26]} receiveShadow>
+        <planeGeometry args={[42, 22]} />
         <meshStandardMaterial color="#f5f5f4" roughness={0.75} />
       </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-25, groundY + 0.005, -26]}>
+        <planeGeometry args={[36, 0.55]} />
+        <meshBasicMaterial color="#e2e8f0" />
+      </mesh>
 
-      {/* 2F正門エントランスデッキを支える白い円柱ピロティ（1F通り道の上部構造） */}
-      <group position={[-22, groundY, -19]}>
-        {/* 2Fデッキ床スラブ */}
-        <mesh position={[0, 3.4, 0]} castShadow receiveShadow>
-          <boxGeometry args={[38, 0.45, 16]} />
+      {/* 2F正門エントランスデッキ（ピロティ橋桁＆白い丸柱：現地写真1・3準拠） */}
+      <group position={[-18, groundY, -24]}>
+        {/* 2Fデッキ橋桁スラブ */}
+        <mesh position={[0, 3.55, 0]} castShadow receiveShadow>
+          <boxGeometry args={[46, 0.85, 18]} />
           <meshStandardMaterial color="#e7e5e4" />
         </mesh>
+        {/* 2Fデッキ手すり（現地写真3の格子手すり） */}
+        <mesh position={[0, 4.45, 8.8]}>
+          <boxGeometry args={[46, 0.95, 0.15]} />
+          <meshStandardMaterial color="#334155" />
+        </mesh>
+        <mesh position={[0, 4.45, -8.8]}>
+          <boxGeometry args={[46, 0.95, 0.15]} />
+          <meshStandardMaterial color="#334155" />
+        </mesh>
         {/* ピロティの白い丸柱 */}
-        {[-15, -5, 5, 14].map((px, idx) => (
+        {[-18, -6, 6].map((px, idx) => (
           <React.Fragment key={`piloti-${idx}`}>
-            <mesh position={[px, 1.7, -5.5]} castShadow>
-              <cylinderGeometry args={[0.32, 0.32, 3.4, 16]} />
+            <mesh position={[px, 1.75, -7.2]} castShadow>
+              <cylinderGeometry args={[0.32, 0.32, 3.5, 16]} />
               <meshStandardMaterial color="#f8fafc" />
             </mesh>
-            <mesh position={[px, 1.7, 5.5]} castShadow>
-              <cylinderGeometry args={[0.32, 0.32, 3.4, 16]} />
+            <mesh position={[px, 1.75, 7.2]} castShadow>
+              <cylinderGeometry args={[0.32, 0.32, 3.5, 16]} />
               <meshStandardMaterial color="#f8fafc" />
             </mesh>
           </React.Fragment>
         ))}
       </group>
 
-      {/* 屋外階段B（X=-10〜-2, Z=-14〜-2：右側に階段、左側にピロティ通り道） */}
-      <group position={[-6, groundY, -2]}>
+      {/* 屋外階段B（現地写真3準拠：Z=-14から北Z=-26へ登り、右側に学友会室・左側にピロティ通り道） */}
+      <group position={[1, groundY, -14]}>
         {Array.from({ length: 14 }).map((_, i) => {
-          const stepY = (i + 0.5) * (3.4 / 14);
+          const stepY = (i + 0.5) * (3.55 / 14);
           const stepZ = -(i + 0.5) * (12 / 14);
           return (
             <mesh key={`stair-${i}`} position={[0, stepY, stepZ]} castShadow receiveShadow>
-              <boxGeometry args={[7.6, 3.4 / 14, 12 / 14 + 0.15]} />
+              <boxGeometry args={[7.6, 3.55 / 14, 12 / 14 + 0.15]} />
               <meshStandardMaterial color={i % 2 === 0 ? '#e7e5e4' : '#d6d3d1'} roughness={0.7} />
             </mesh>
           );
         })}
-        {/* 西側コンクリート擁壁（階段とピロティ通り道の境界壁） */}
-        <mesh position={[-4.0, 1.8, -6]} castShadow>
-          <boxGeometry args={[0.45, 3.6, 12.2]} />
+        {/* 西側コンクリート擁壁（階段とピロティ通り道の境界壁・現地写真3のアート壁面） */}
+        <mesh position={[-4.0, 2.0, -6]} castShadow>
+          <boxGeometry args={[0.45, 4.0, 12.2]} />
           <meshStandardMaterial color="#a8a29e" />
         </mesh>
         {/* 東側手すり壁（学友会室側） */}
-        <mesh position={[4.0, 2.0, -6]} rotation={[0.275, 0, 0]}>
+        <mesh position={[4.0, 2.2, -6]} rotation={[0.285, 0, 0]}>
           <boxGeometry args={[0.35, 1.1, 12.6]} />
-          <meshStandardMaterial color="#a8a29e" />
+          <meshStandardMaterial color="#64748b" />
         </mesh>
       </group>
 
@@ -372,24 +383,24 @@ function CampusScenery({ currentFloor, insideGroup }) {
       {[-5, 2, 9, 16, 22].map((zPos, i) => (
         <React.Fragment key={`patio-tree-${i}`}>
           <CampusTree
-            position={[-8.6, groundY, zPos]}
+            position={[-10.5, groundY, zPos]}
             scale={0.95}
             leafColor={i % 2 === 0 ? '#65a30d' : '#ca8a04'}
           />
           <CampusTree
-            position={[2.6, groundY, zPos]}
+            position={[3.2, groundY, zPos]}
             scale={0.95}
             leafColor={i % 2 === 0 ? '#4d7c0f' : '#a16207'}
           />
         </React.Fragment>
       ))}
       {[-1, 12, 20].map((zPos, idx) => (
-        <group key={`bench-${idx}`} position={[-3, groundY, zPos]}>
-          <mesh position={[-3.2, 0.25, 0]}>
+        <group key={`bench-${idx}`} position={[-4, groundY, zPos]}>
+          <mesh position={[-3.5, 0.25, 0]}>
             <boxGeometry args={[1.4, 0.5, 0.7]} />
             <meshStandardMaterial color="#78716c" />
           </mesh>
-          <mesh position={[3.2, 0.25, 0]}>
+          <mesh position={[3.5, 0.25, 0]}>
             <boxGeometry args={[1.4, 0.5, 0.7]} />
             <meshStandardMaterial color="#78716c" />
           </mesh>
@@ -402,7 +413,7 @@ function CampusScenery({ currentFloor, insideGroup }) {
       {show1236Walls && (
         <group>
           {/* 1号館 中央メインアーチゲート（Z=26） */}
-          <group position={[-3, groundY, 26]}>
+          <group position={[-4, groundY, 26]}>
             <mesh position={[-4.2, 3.6, 0]} castShadow>
               <boxGeometry args={[2.0, 7.2, 1.1]} />
               <meshStandardMaterial color="#9a3412" roughness={0.75} />
@@ -426,31 +437,24 @@ function CampusScenery({ currentFloor, insideGroup }) {
           </group>
 
           {/* 1号館 1〜2F 左右レンガアーチ回廊 */}
-          <BrickArchFacade position={[-22, groundY, 26]} count={7} width={3.6} height={6.2} />
+          <BrickArchFacade position={[-23, groundY, 26]} count={7} width={3.6} height={6.2} />
           <BrickArchFacade position={[18, groundY, 26]} count={8} width={3.6} height={6.2} />
 
           {/* 2号館・6号館の中庭側レンガアーチ回廊 */}
           <BrickArchFacade
-            position={[-10, groundY, 8]}
+            position={[-12, groundY, 7]}
             rotation={[0, Math.PI / 2, 0]}
             count={9}
             width={3.6}
             height={6.2}
           />
           <BrickArchFacade
-            position={[4, groundY, 8]}
+            position={[4.5, groundY, 7]}
             rotation={[0, -Math.PI / 2, 0]}
             count={9}
             width={3.6}
             height={6.2}
           />
-
-          {/* 屋外階段Bの東側（3号館〜6号館接続部 Z=-17）のレンガアーチファサード */}
-          <BrickArchFacade position={[7.5, groundY, -17]} count={3} width={3.6} height={6.2} />
-          <mesh position={[7.5, groundY + 8.6, -17]}>
-            <boxGeometry args={[11, 4.5, 0.5]} />
-            <meshStandardMaterial color="#f5f5f4" />
-          </mesh>
 
           {/* 1号館 高層タワー外観（13階建てアイボリー外壁＋ガラスアトリウム） */}
           <group position={[0, groundY, 50.4]}>
@@ -462,15 +466,15 @@ function CampusScenery({ currentFloor, insideGroup }) {
               <boxGeometry args={[40, 42, 0.7]} />
               <meshStandardMaterial color="#f5f5f4" roughness={0.6} />
             </mesh>
-            <mesh position={[-3, 23, -0.1]}>
+            <mesh position={[-4, 23, -0.1]}>
               <boxGeometry args={[10, 34, 0.6]} />
               <meshStandardMaterial color="#7dd3fc" transparent opacity={0.75} roughness={0.15} />
             </mesh>
-            <mesh position={[-3, 22, -1.6]} castShadow>
+            <mesh position={[-4, 22, -1.6]} castShadow>
               <cylinderGeometry args={[5.4, 5.4, 0.35, 24, 1, false, -Math.PI / 2, Math.PI]} />
               <meshStandardMaterial color="#e7e5e4" />
             </mesh>
-            <mesh position={[-3, 41.5, -1.8]} castShadow>
+            <mesh position={[-4, 41.5, -1.8]} castShadow>
               <cylinderGeometry args={[5.6, 5.6, 0.4, 24, 1, false, -Math.PI / 2, Math.PI]} />
               <meshStandardMaterial color="#e7e5e4" />
             </mesh>
@@ -479,42 +483,34 @@ function CampusScenery({ currentFloor, insideGroup }) {
       )}
 
       {/* =================================================================== */}
-      {/* 3. 2号館側（西側 X=-68）の大通り・横断歩道・2F空中歩行者デッキ        */}
+      {/* 3. 大通り・横断歩道（5号館正面直結）・センタープロムナード・2Fデッキ   */}
       {/* =================================================================== */}
-      <group position={[-68, groundY - 0.05, 0]}>
-        {/* 片側2車線の大通り（X = -77 〜 -59） */}
+      <group position={[-53, groundY - 0.05, 0]}>
+        {/* 片側2車線の大通り（X = -62 〜 -44） */}
         <mesh rotation={[-Math.PI / 2, 0, 0]}>
           <planeGeometry args={[18, 280]} />
           <meshStandardMaterial color="#334155" roughness={0.9} />
         </mesh>
-        {/* 中央分離帯（横断歩道部分は途切れさせる） */}
-        <mesh position={[0, 0.15, -75]}>
-          <boxGeometry args={[1.4, 0.3, 96]} />
+        {/* 中央分離帯（横断歩道 Z=-26 部分は途切れさせる） */}
+        <mesh position={[0, 0.15, -88]}>
+          <boxGeometry args={[1.4, 0.3, 108]} />
           <meshStandardMaterial color="#15803d" />
         </mesh>
-        <mesh position={[0, 0.15, 85]}>
-          <boxGeometry args={[1.4, 0.3, 105]} />
+        <mesh position={[0, 0.15, 45]}>
+          <boxGeometry args={[1.4, 0.3, 126]} />
           <meshStandardMaterial color="#15803d" />
         </mesh>
 
-        {/* 1F地上徒歩ルート：4号館方面 横断歩道（Z=22） */}
-        {[-6, -3, 0, 3, 6].map((zOff, i) => (
-          <mesh key={`cw1-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 22 + zOff]}>
-            <planeGeometry args={[16, 1.3]} />
-            <meshBasicMaterial color="#f8fafc" />
-          </mesh>
-        ))}
-
-        {/* 1F地上徒歩ルート：ピロティ通り道から5号館正面への横断歩道（Z=-19） */}
+        {/* 1F地上徒歩ルート：モニュメント広場から5号館正面入口への横断歩道（Z=-26） */}
         {[-5, -2.5, 0, 2.5, 5].map((zOff, i) => (
-          <mesh key={`cw2-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, -19 + zOff]}>
+          <mesh key={`cw-bldg5-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, -26 + zOff]}>
             <planeGeometry args={[16, 1.2]} />
             <meshBasicMaterial color="#f8fafc" />
           </mesh>
         ))}
 
         {/* 道路沿いの街路樹 */}
-        {[-65, -45, -32, 4, 42, 62].map((z, idx) => (
+        {[-70, -52, -40, -10, 12, 34, 54].map((z, idx) => (
           <React.Fragment key={`road-tree-${idx}`}>
             <CampusTree position={[-10.5, 0, z]} scale={1.15} leafColor="#3f6212" />
             <CampusTree position={[10.5, 0, z]} scale={1.15} leafColor="#4d7c0f" />
@@ -522,24 +518,53 @@ function CampusScenery({ currentFloor, insideGroup }) {
         ))}
       </group>
 
-      {/* 2F高さ（groundY + 3.4）で大通りをまたぐ空中歩行者デッキ（2号館 2F 正門デッキ ⇔ 4号館 2F） */}
-      <group position={[-64, groundY + 3.4, 21]}>
+      {/* 案内板上部「センタープロムナード」（5号館・4号館の北側を東西に走る歩行者専用緑道） */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-122, groundY - 0.03, -53]} receiveShadow>
+        <planeGeometry args={[124, 10]} />
+        <meshStandardMaterial color="#e7e5e4" roughness={0.8} />
+      </mesh>
+
+      {/* 2F高さ（groundY + 3.55）で大通りをまたぐ空中歩行者デッキ（正門デッキ ⇔ 5号館・4号館 2F） */}
+      <group position={[-57, groundY + 3.55, -26]}>
         <mesh castShadow receiveShadow>
-          <boxGeometry args={[48, 0.4, 12]} />
+          <boxGeometry args={[32, 0.45, 12]} />
           <meshStandardMaterial color="#e2e8f0" roughness={0.6} />
         </mesh>
         <mesh position={[0, 0.65, 5.8]}>
-          <boxGeometry args={[48, 0.9, 0.15]} />
+          <boxGeometry args={[32, 0.9, 0.15]} />
           <meshStandardMaterial color="#94a3b8" />
         </mesh>
         <mesh position={[0, 0.65, -5.8]}>
-          <boxGeometry args={[48, 0.9, 0.15]} />
+          <boxGeometry args={[32, 0.9, 0.15]} />
           <meshStandardMaterial color="#94a3b8" />
         </mesh>
       </group>
 
       {/* =================================================================== */}
-      {/* 4. 4号館の外観（屋外にいるときのみ表示・4号館に入ると自動で消える）      */}
+      {/* 4. 5号館の外観（大通り横断歩道の正面・縦ルーバー外観）                 */}
+      {/* =================================================================== */}
+      {show5Walls && (
+        <group position={[BLDG5_OFFSET.x, groundY, BLDG5_OFFSET.z]}>
+          <mesh position={[0, 12, -22.2]} castShadow>
+            <boxGeometry args={[44, 24, 0.6]} />
+            <meshStandardMaterial color="#f5f5f4" />
+          </mesh>
+          <mesh position={[0, 12, 22.2]} castShadow>
+            <boxGeometry args={[44, 24, 0.6]} />
+            <meshStandardMaterial color="#f5f5f4" />
+          </mesh>
+          {/* 東側（大通り面）の縦ルーバーフィン */}
+          {[-14, -8, -2, 4, 10, 16].map((zOff, i) => (
+            <mesh key={`fin-${i}`} position={[22.3, 13.5, zOff]} castShadow>
+              <boxGeometry args={[0.9, 19, 0.35]} />
+              <meshStandardMaterial color="#f8fafc" />
+            </mesh>
+          ))}
+        </group>
+      )}
+
+      {/* =================================================================== */}
+      {/* 5. 4号館の外観（5号館の西隣に配置・案内板準拠）                       */}
       {/* =================================================================== */}
       {show4Walls && (
         <group position={[BLDG4_OFFSET.x, groundY, BLDG4_OFFSET.z]}>
@@ -562,30 +587,6 @@ function CampusScenery({ currentFloor, insideGroup }) {
         </group>
       )}
 
-      {/* =================================================================== */}
-      {/* 5. 5号館の外観（ストリートビュー写真準拠の白い縦ルーバー外観）         */}
-      {/* =================================================================== */}
-      {show5Walls && (
-        <group position={[BLDG5_OFFSET.x, groundY, BLDG5_OFFSET.z]}>
-          {/* 5号館 北・西の外壁（7階建て） */}
-          <mesh position={[0, 12, -22.2]} castShadow>
-            <boxGeometry args={[44, 24, 0.6]} />
-            <meshStandardMaterial color="#f5f5f4" />
-          </mesh>
-          <mesh position={[-22.2, 12, 0]} castShadow>
-            <boxGeometry args={[0.6, 24, 44]} />
-            <meshStandardMaterial color="#f5f5f4" />
-          </mesh>
-          {/* 東側（大通り面）の縦ルーバーフィン（写真3準拠） */}
-          {[-14, -8, -2, 4, 10, 16].map((zOff, i) => (
-            <mesh key={`fin-${i}`} position={[22.3, 13.5, zOff]} castShadow>
-              <boxGeometry args={[0.9, 19, 0.35]} />
-              <meshStandardMaterial color="#f8fafc" />
-            </mesh>
-          ))}
-        </group>
-      )}
-
       {/* 周囲の公園・緑地 */}
       {[-25, -10, 5, 20, 32].map((x, i) => (
         <CampusTree key={`park-n-${i}`} position={[x, groundY, -72 - (i % 2) * 7]} scale={1.3} leafColor="#15803d" />
@@ -597,7 +598,7 @@ function CampusScenery({ currentFloor, insideGroup }) {
   );
 }
 
-// 入り口（ドア開口）付きの部屋立体モデル（中に入って歩き回れる）
+// 入り口（ドア開口）付きの部屋立体モデル
 function RoomBox({ room }) {
   const wallH = 2.8;
   const wallT = 0.24;
@@ -965,22 +966,22 @@ function PlayerController({
       }
     }
 
-    // 1F中庭の屋外階段B（X: -10〜-2, Z: -14〜-2）での高さ追従＆1F⇔2F正門デッキ自動切替
+    // 屋外階段B（X: -3〜+5, Z: -26〜-14）での高さ追従＆1F⇔2F正門デッキ自動切替
     let playerY = 0;
     const px = posRef.current.x;
     const pz = posRef.current.z;
 
-    if (currentFloor === '1F' && px >= -10 && px <= -2 && pz <= -2 && pz >= -14) {
-      const progress = (-2 - pz) / 12;
-      playerY = progress * 3.4;
-      if (pz <= -13.4 && stairCooldownRef.current <= 0) {
+    if (currentFloor === '1F' && px >= -3 && px <= 5 && pz <= -14 && pz >= -26) {
+      const progress = (-14 - pz) / 12;
+      playerY = progress * 3.55;
+      if (pz <= -25.4 && stairCooldownRef.current <= 0) {
         stairCooldownRef.current = 1.0;
-        posRef.current.z = -15.5;
+        posRef.current.z = -27.5;
         onFloorAutoSwitch('2F');
       }
-    } else if (currentFloor === '2F' && px >= -10 && px <= -2 && pz >= -14 && pz <= -11.5 && stairCooldownRef.current <= 0) {
+    } else if (currentFloor === '2F' && px >= -3 && px <= 5 && pz >= -26 && pz <= -23.5 && stairCooldownRef.current <= 0) {
       stairCooldownRef.current = 1.0;
-      posRef.current.z = -11.5;
+      posRef.current.z = -23.5;
       onFloorAutoSwitch('1F');
     }
 
@@ -1075,7 +1076,7 @@ export default function ThreeCampusViewer({ onClose }) {
 
   const allFloors = ['1F', '2F', '3F', '4F', '5F', '6F', '7F', '8F', '9F', '10F', '11F', '12F', '13F'];
 
-  // 1・2・3・6号館、中庭・ピロティ通り道・大通り、4号館、5号館を1つの連続空間に統合
+  // 全建物・中庭・ピロティ通り道・モニュメント広場・大通り横断歩道・5号館・4号館を連続空間に統合
   const unifiedFloorData = useMemo(() => {
     const f1236 = CAMPUS_3D_BUILDINGS['area-1236']?.floors?.[currentFloor];
     const f4 = CAMPUS_3D_BUILDINGS['area-4']?.floors?.[currentFloor];
@@ -1095,110 +1096,111 @@ export default function ThreeCampusViewer({ onClose }) {
       f1236.voids?.forEach((v) => voids.push({ ...v }));
     }
 
-    // 1F：屋外中庭 ＋ 屋外階段Bの西側ピロティ通り道（モニュメント門・横断歩道・5号館＆4号館へ直通）
+    // 1F：屋外中庭 ＋ 屋外階段B ＋ 左側ピロティ通り道 ＋ モニュメント広場 ＋ 横断歩道（5号館正面直結）
     if (currentFloor === '1F') {
+      // 中庭（パティオ）＋屋外階段Bの階段部分
       buildingZones.push({
         name: '中庭（パティオ）・屋外階段B',
-        minX: -12,
+        minX: -14,
         maxX: 6,
-        minZ: -14,
+        minZ: -26,
         maxZ: 26,
         floorColor: '#e7e5e4',
         isOutdoor: true,
       });
-      // 屋外階段Bの右側（西側）から2号館の北側を通り抜けるピロティ通り道
+      // 屋外階段Bの西側（階段上から1号館を向いて右側）のピロティ通り道
       buildingZones.push({
-        name: '正門デッキ下ピロティ通り道（5号館・4号館方面）',
-        minX: -62,
-        maxX: -10,
-        minZ: -28,
-        maxZ: -10,
+        name: '正門デッキ下ピロティ通り道',
+        minX: -14,
+        maxX: -3,
+        minZ: -34,
+        maxZ: -12,
         floorColor: '#f5f5f4',
         isOutdoor: true,
       });
-      // 大通り横断歩道（5号館正面入口へ直結：Z = -26〜-12）
+      // モニュメント広場（2号館北側〜大通りまで開放）
       buildingZones.push({
-        name: '大通り横断歩道（5号館正面ルート）',
-        minX: -94,
-        maxX: -62,
-        minZ: -26,
+        name: 'モニュメント広場（5号館・4号館方面）',
+        minX: -44,
+        maxX: -14,
+        minZ: -44,
         maxZ: -12,
+        floorColor: '#f5f5f4',
+        isOutdoor: true,
+      });
+      // 大通り横断歩道（モニュメント広場から5号館正面入口へ直結：Z = -32〜-20）
+      buildingZones.push({
+        name: '大通り横断歩道（5号館正面）',
+        minX: -66,
+        maxX: -44,
+        minZ: -32,
+        maxZ: -20,
         floorColor: '#475569',
         isOutdoor: true,
       });
-      // 西側歩道（4号館・5号館を結ぶプロムナード：X = -94〜-78, Z = -36〜36）
+      // 大通り西側歩道（5号館前）
       buildingZones.push({
-        name: '西側プロムナード（4号館・5号館前）',
-        minX: -94,
-        maxX: -78,
-        minZ: -36,
-        maxZ: 36,
+        name: '西側歩道（5号館前）',
+        minX: -72,
+        maxX: -62,
+        minZ: -56,
+        maxZ: -4,
         floorColor: '#d6d3d1',
         isOutdoor: true,
       });
-      // 大通り横断歩道（4号館方面：Z = 14〜30）
+      // 5号館と4号館の間の通路（案内板準拠）
       buildingZones.push({
-        name: '大通り横断歩道（4号館ルート）',
-        minX: -78,
-        maxX: -40,
-        minZ: 14,
-        maxZ: 30,
-        floorColor: '#475569',
+        name: '5号館・4号館 間通路',
+        minX: -124,
+        maxX: -116,
+        minZ: -56,
+        maxZ: -4,
+        floorColor: '#d6d3d1',
+        isOutdoor: true,
+      });
+      // 北側センタープロムナード歩道（5号館・4号館それぞれの1F入口へ直結）
+      buildingZones.push({
+        name: 'センタープロムナード歩道',
+        minX: -182,
+        maxX: -62,
+        minZ: -56,
+        maxZ: -46,
+        floorColor: '#e7e5e4',
         isOutdoor: true,
       });
 
       connectors.push(
-        { name: '屋外階段B（2F正門デッキへ）', x: -6, z: -4 },
-        { name: 'ピロティ通り道（5号館方面へ）', x: -24, z: -19 },
-        { name: '横断歩道（5号館正面）', x: -72, z: -19 }
+        { name: '屋外階段B（2F正門デッキへ）', x: 1, z: -15 },
+        { name: 'ピロティ通り道（5号館方面へ）', x: -8.5, z: -22 },
+        { name: '横断歩道（5号館正面入口）', x: -53, z: -26 }
       );
     }
 
-    // 2F：正門エントランスデッキから大通りをまたぐ空中歩行者デッキ（4号館 2Fへ直結）
+    // 2F：正門エントランスデッキから大通りをまたぐ空中歩行者デッキ（5号館・4号館 2Fへ直結）
     if (currentFloor === '2F') {
       buildingZones.push({
-        name: '空中歩行者デッキ（正門デッキ ⇔ 4号館）',
-        minX: -88,
-        maxX: -40,
-        minZ: 15,
-        maxZ: 27,
+        name: '空中歩行者デッキ（正門デッキ ⇔ 5号館・4号館）',
+        minX: -72,
+        maxX: -42,
+        minZ: -32,
+        maxZ: -20,
+        floorColor: '#cbd5e1',
+        isOutdoor: true,
+      });
+      buildingZones.push({
+        name: '2F連絡デッキ（5号館 ⇔ 4号館）',
+        minX: -124,
+        maxX: -116,
+        minZ: -34,
+        maxZ: -22,
         floorColor: '#cbd5e1',
         isOutdoor: true,
       });
       connectors.push({
-        name: '空中歩行者デッキ（4号館 2F直結）',
-        x: -64,
-        z: 21,
+        name: '空中歩行者デッキ（5号館・4号館 2F直結）',
+        x: -57,
+        z: -26,
       });
-    }
-
-    // 4号館
-    if (f4) {
-      f4.buildingZones?.forEach((z) =>
-        buildingZones.push({
-          ...z,
-          minX: z.minX + BLDG4_OFFSET.x,
-          maxX: z.maxX + BLDG4_OFFSET.x,
-          minZ: z.minZ + BLDG4_OFFSET.z,
-          maxZ: z.maxZ + BLDG4_OFFSET.z,
-          bldgGroup: '4',
-        })
-      );
-      f4.rooms?.forEach((r) =>
-        rawRooms.push({
-          ...r,
-          x: r.x + BLDG4_OFFSET.x,
-          z: r.z + BLDG4_OFFSET.z,
-          bldgGroup: '4',
-        })
-      );
-      f4.elevators?.forEach((e) =>
-        elevators.push({
-          ...e,
-          x: e.x + BLDG4_OFFSET.x,
-          z: e.z + BLDG4_OFFSET.z,
-        })
-      );
     }
 
     // 5号館
@@ -1233,6 +1235,35 @@ export default function ThreeCampusViewer({ onClose }) {
           ...v,
           x: v.x + BLDG5_OFFSET.x,
           z: v.z + BLDG5_OFFSET.z,
+        })
+      );
+    }
+
+    // 4号館
+    if (f4) {
+      f4.buildingZones?.forEach((z) =>
+        buildingZones.push({
+          ...z,
+          minX: z.minX + BLDG4_OFFSET.x,
+          maxX: z.maxX + BLDG4_OFFSET.x,
+          minZ: z.minZ + BLDG4_OFFSET.z,
+          maxZ: z.maxZ + BLDG4_OFFSET.z,
+          bldgGroup: '4',
+        })
+      );
+      f4.rooms?.forEach((r) =>
+        rawRooms.push({
+          ...r,
+          x: r.x + BLDG4_OFFSET.x,
+          z: r.z + BLDG4_OFFSET.z,
+          bldgGroup: '4',
+        })
+      );
+      f4.elevators?.forEach((e) =>
+        elevators.push({
+          ...e,
+          x: e.x + BLDG4_OFFSET.x,
+          z: e.z + BLDG4_OFFSET.z,
         })
       );
     }
@@ -1275,15 +1306,15 @@ export default function ThreeCampusViewer({ onClose }) {
       setTeleportTarget({ coords: [0, 38], ts: Date.now() });
     } else if (area === 'patio') {
       setCurrentFloor('1F');
-      setTeleportTarget({ coords: [-6, -2], ts: Date.now() });
+      setTeleportTarget({ coords: [-3, -10], ts: Date.now() });
+    } else if (area === '5') {
+      const targetFl = ['1F', '2F', '3F', '4F', '5F', '6F', '7F'].includes(currentFloor) ? currentFloor : '1F';
+      setCurrentFloor(targetFl);
+      setTeleportTarget({ coords: [BLDG5_OFFSET.x + 14, BLDG5_OFFSET.z], ts: Date.now() });
     } else if (area === '4') {
       const targetFl = ['2F', '3F', '4F', '5F'].includes(currentFloor) ? currentFloor : '2F';
       setCurrentFloor(targetFl);
       setTeleportTarget({ coords: [BLDG4_OFFSET.x + 16, BLDG4_OFFSET.z + 8], ts: Date.now() });
-    } else if (area === '5') {
-      const targetFl = ['1F', '2F', '3F', '4F', '5F', '6F', '7F'].includes(currentFloor) ? currentFloor : '1F';
-      setCurrentFloor(targetFl);
-      setTeleportTarget({ coords: [BLDG5_OFFSET.x + 12, BLDG5_OFFSET.z + 8], ts: Date.now() });
     }
   };
 
@@ -1321,16 +1352,16 @@ export default function ThreeCampusViewer({ onClose }) {
             屋外階段B・5号館通路
           </button>
           <button
-            onClick={() => handleQuickJump('4')}
-            className="px-2 py-0.5 rounded bg-slate-700 hover:bg-blue-600 text-[11px] font-bold transition"
-          >
-            4号館
-          </button>
-          <button
             onClick={() => handleQuickJump('5')}
             className="px-2 py-0.5 rounded bg-slate-700 hover:bg-blue-600 text-[11px] font-bold transition"
           >
             5号館
+          </button>
+          <button
+            onClick={() => handleQuickJump('4')}
+            className="px-2 py-0.5 rounded bg-slate-700 hover:bg-blue-600 text-[11px] font-bold transition"
+          >
+            4号館
           </button>
         </div>
 
@@ -1368,16 +1399,16 @@ export default function ThreeCampusViewer({ onClose }) {
             階段B・通路
           </button>
           <button
-            onClick={() => handleQuickJump('4')}
-            className="flex-1 py-1 rounded bg-slate-700 active:bg-blue-600 text-[10px] text-white font-bold"
-          >
-            4号館
-          </button>
-          <button
             onClick={() => handleQuickJump('5')}
             className="flex-1 py-1 rounded bg-slate-700 active:bg-blue-600 text-[10px] text-white font-bold"
           >
             5号館
+          </button>
+          <button
+            onClick={() => handleQuickJump('4')}
+            className="flex-1 py-1 rounded bg-slate-700 active:bg-blue-600 text-[10px] text-white font-bold"
+          >
+            4号館
           </button>
         </div>
       )}
@@ -1407,7 +1438,7 @@ export default function ThreeCampusViewer({ onClose }) {
       <div className="relative flex-1 w-full h-full touch-none">
         <Canvas shadows camera={{ position: [0, 16, 56], fov: 45 }}>
           <color attach="background" args={['#bae6fd']} />
-          <fog attach="fog" args={['#bae6fd', 140, 320]} />
+          <fog attach="fog" args={['#bae6fd', 150, 340]} />
 
           <ambientLight intensity={0.85} />
           <directionalLight
@@ -1484,7 +1515,7 @@ export default function ThreeCampusViewer({ onClose }) {
               <li><span className="font-bold text-white">W A S D / 矢印キー</span>：移動（ドアから入室可）</li>
               <li><span className="font-bold text-white">マウスドラッグ</span>：視点回転</li>
               <li><span className="font-bold text-white">1F 屋外階段B</span>：歩くと自動で2F正門デッキへ</li>
-              <li><span className="font-bold text-white">階段Bの西側通路</span>：そのまま5号館へ徒歩移動可</li>
+              <li><span className="font-bold text-white">ピロティ通り道</span>：モニュメント広場→5号館直通</li>
             </ul>
             <div className="pt-2 border-t border-slate-700">
               <span className="text-[11px] text-slate-400 block mb-1.5">階数ダイレクト切替</span>
