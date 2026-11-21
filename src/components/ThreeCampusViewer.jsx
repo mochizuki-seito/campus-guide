@@ -263,7 +263,7 @@ function TrafficSignal({ position, rotation = [0, 0, 0] }) {
   );
 }
 
-// キャンパス道路・信号・芝生広場・モニュメント広場・屋外階段B・吹き抜け大階段
+// キャンパス道路・信号・芝生広場・モニュメント広場・屋外階段B・5号館3階段＆2F連絡通路
 function CampusScenery({ currentFloor }) {
   const floorNum = parseInt(currentFloor.replace('F', ''), 10) || 1;
   const groundY = -(floorNum - 1) * 3.4;
@@ -288,7 +288,7 @@ function CampusScenery({ currentFloor }) {
         <meshStandardMaterial color="#d6d3d1" roughness={0.85} />
       </mesh>
 
-      {/* 5号館北側（センタープロムナード側）の楕円芝生広場（外観写真準拠） */}
+      {/* 5号館北側（センタープロムナード側）の芝生広場 */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-34, groundY - 0.04, -55]} receiveShadow>
         <planeGeometry args={[30, 8]} />
         <meshStandardMaterial color="#4d7c0f" roughness={0.9} />
@@ -303,7 +303,6 @@ function CampusScenery({ currentFloor }) {
       {/* =================================================================== */}
       {/* 1. 道路・センタープロムナード・信号＆横断歩道                       */}
       {/* =================================================================== */}
-      {/* 北側 センタープロムナード（東西歩行者緑道） */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-15, groundY - 0.05, -66]} receiveShadow>
         <planeGeometry args={[216, 10]} />
         <meshStandardMaterial color="#e7e5e4" roughness={0.8} />
@@ -314,13 +313,11 @@ function CampusScenery({ currentFloor }) {
         </div>
       </Html>
 
-      {/* 中央の南北大通り（右側街区と左側街区の間：X=-10〜+8） */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-1, groundY - 0.06, 8]} receiveShadow>
         <planeGeometry args={[18, 130]} />
         <meshStandardMaterial color="#334155" roughness={0.9} />
       </mesh>
 
-      {/* 左側街区（4・5号館）と南側区画の間の東西道路 */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-66, groundY - 0.06, -2]} receiveShadow>
         <planeGeometry args={[112, 8]} />
         <meshStandardMaterial color="#334155" roughness={0.9} />
@@ -336,24 +333,55 @@ function CampusScenery({ currentFloor }) {
       <TrafficSignal position={[-11, groundY, -11.5]} rotation={[0, Math.PI / 2, 0]} />
       <TrafficSignal position={[9, groundY, -21.5]} rotation={[0, -Math.PI / 2, 0]} />
 
-      {/* 5号館 1F学生ホール内の吹き抜け大階段（内部写真準拠：X=-24, Z=-34） */}
-      <group position={[-24, groundY, -34]}>
+      {/* =================================================================== */}
+      {/* 5号館 1Fの3つの階段（配置図準拠）＆ 2F連絡通路（北西側）            */}
+      {/* =================================================================== */}
+      {/* 階段①：南東（信号前風除室横：Z=-22から南Z=-14.5へ上る） */}
+      <group position={[-23.5, groundY, -22]}>
         {Array.from({ length: 12 }).map((_, i) => {
           const stepY = (i + 0.5) * (3.4 / 12);
-          const stepZ = (i + 0.5) * (9 / 12);
+          const stepZ = (i + 0.5) * (7.5 / 12);
           return (
-            <mesh key={`bldg5-stair-${i}`} position={[0, stepY, stepZ]} castShadow receiveShadow>
-              <boxGeometry args={[2.4, 3.4 / 12, 9 / 12 + 0.1]} />
+            <mesh key={`bldg5-stair-se-${i}`} position={[0, stepY, stepZ]} castShadow receiveShadow>
+              <boxGeometry args={[3.6, 3.4 / 12, 7.5 / 12 + 0.1]} />
+              <meshStandardMaterial color={i % 2 === 0 ? '#cbd5e1' : '#94a3b8'} roughness={0.65} />
+            </mesh>
+          );
+        })}
+      </group>
+
+      {/* 階段②：学生ホール吹き抜け大階段（Z=-29から北Z=-43へ上る） */}
+      <group position={[-26.2, groundY, -29]}>
+        {Array.from({ length: 14 }).map((_, i) => {
+          const stepY = (i + 0.5) * (3.4 / 14);
+          const stepZ = -(i + 0.5) * (14 / 14);
+          return (
+            <mesh key={`bldg5-stair-atrium-${i}`} position={[0, stepY, stepZ]} castShadow receiveShadow>
+              <boxGeometry args={[2.4, 3.4 / 14, 14 / 14 + 0.12]} />
               <meshStandardMaterial color="#d97706" roughness={0.6} />
             </mesh>
           );
         })}
       </group>
 
-      {/* 5号館 ⇔ 4号館 2F連絡デッキ（外観写真右側に写っている2F連絡橋） */}
-      <mesh position={[-54, groundY + 3.4, -22]} castShadow receiveShadow>
-        <boxGeometry args={[4.2, 0.4, 8]} />
-        <meshStandardMaterial color="#e2e8f0" />
+      {/* 階段③：北西（5-101教室北側：東X=-41から西X=-51へ上り2F入口・連絡通路へ） */}
+      <group position={[-41, groundY, -45.5]}>
+        {Array.from({ length: 12 }).map((_, i) => {
+          const stepY = (i + 0.5) * (3.4 / 12);
+          const stepX = -(i + 0.5) * (10 / 12);
+          return (
+            <mesh key={`bldg5-stair-nw-${i}`} position={[stepX, stepY, 0]} castShadow receiveShadow>
+              <boxGeometry args={[10 / 12 + 0.1, 3.4 / 12, 3.6]} />
+              <meshStandardMaterial color={i % 2 === 0 ? '#cbd5e1' : '#94a3b8'} roughness={0.65} />
+            </mesh>
+          );
+        })}
+      </group>
+
+      {/* 5号館 ⇔ 4号館 2F連絡通路（北西の2F出入り口横：Z=-44） */}
+      <mesh position={[-54, groundY + 3.4, -44]} castShadow receiveShadow>
+        <boxGeometry args={[4.4, 0.4, 8]} />
+        <meshStandardMaterial color="#cbd5e1" />
       </mesh>
 
       {/* =================================================================== */}
@@ -964,15 +992,51 @@ function PlayerController({
       onFloorAutoSwitch('1F');
     }
 
-    // 5号館 1F学生ホール吹き抜け大階段（X: -25.2〜-22.8, Z: -34〜-25）での高さ追従＆1F⇔2F切替
-    if (currentFloor === '1F' && px >= -25.2 && px <= -22.8 && pz >= -34 && pz <= -25) {
-      const progress = (pz - -34) / 9;
+    // 5号館 階段①：南東（信号前風除室横：Z=-22からZ=-14.5へ上る）
+    if (currentFloor === '1F' && px >= -25.5 && px <= -21.5 && pz >= -22 && pz <= -14.5) {
+      const progress = (pz - -22) / 7.5;
       playerY = progress * 3.4;
-      if (pz >= -25.4 && stairCooldownRef.current <= 0) {
+      if (pz >= -15.2 && stairCooldownRef.current <= 0) {
         stairCooldownRef.current = 1.0;
-        posRef.current.x = -27;
+        posRef.current.z = -16.5;
         onFloorAutoSwitch('2F');
       }
+    } else if (currentFloor === '2F' && px >= -25.5 && px <= -21.5 && pz >= -15.8 && pz <= -14.5 && stairCooldownRef.current <= 0) {
+      stairCooldownRef.current = 1.0;
+      posRef.current.z = -22.5;
+      onFloorAutoSwitch('1F');
+    }
+
+    // 5号館 階段②：学生ホール吹き抜け大階段（Z=-29から北Z=-43へ上る）
+    if (currentFloor === '1F' && px >= -27.5 && px <= -24.9 && pz >= -43 && pz <= -29) {
+      const progress = (-29 - pz) / 14;
+      playerY = progress * 3.4;
+      if (pz <= -42.3 && stairCooldownRef.current <= 0) {
+        stairCooldownRef.current = 1.0;
+        posRef.current.z = -44.2;
+        onFloorAutoSwitch('2F');
+      }
+    } else if (currentFloor === '2F' && px >= -27.5 && px <= -24.9 && pz >= -43.5 && pz <= -41.5 && stairCooldownRef.current <= 0) {
+      stairCooldownRef.current = 1.0;
+      posRef.current.z = -28.2;
+      onFloorAutoSwitch('1F');
+    }
+
+    // 5号館 階段③：北西（5-101教室北側：東X=-41から西X=-51へ上り2F入口・連絡通路へ）
+    if (currentFloor === '1F' && px >= -51 && px <= -41 && pz >= -47.5 && pz <= -43.5) {
+      const progress = (-41 - px) / 10;
+      playerY = progress * 3.4;
+      if (px <= -50.3 && stairCooldownRef.current <= 0) {
+        stairCooldownRef.current = 1.0;
+        posRef.current.x = -50.2;
+        posRef.current.z = -43.5;
+        onFloorAutoSwitch('2F');
+      }
+    } else if (currentFloor === '2F' && px >= -51.5 && px <= -49.5 && pz >= -47.5 && pz <= -44.8 && stairCooldownRef.current <= 0) {
+      stairCooldownRef.current = 1.0;
+      posRef.current.x = -40.2;
+      posRef.current.z = -45.5;
+      onFloorAutoSwitch('1F');
     }
 
     if (playerRef.current) {
@@ -1105,12 +1169,13 @@ export default function ThreeCampusViewer({ onClose }) {
     }
 
     if (currentFloor === '2F') {
+      // 5号館⇔4号館 2F連絡通路（北西側の2F出入り口のすぐ横）
       buildingZones.push({
-        name: '5・4号館 2F連絡デッキ',
+        name: '5・4号館 2F連絡通路',
         minX: -56,
         maxX: -52,
-        minZ: -26,
-        maxZ: -18,
+        minZ: -48,
+        maxZ: -40,
         floorColor: '#cbd5e1',
         isOutdoor: true,
       });
@@ -1122,10 +1187,10 @@ export default function ThreeCampusViewer({ onClose }) {
         { label: '3号館 2F入口', x: 44, z: -46, side: 'west' },
         { label: '6号館 北2F入口', x: 48, z: -6, side: 'west' },
         { label: '6号館 南2F入口', x: 48, z: 18, side: 'west' },
-        { label: '5号館 2F入口', x: -46, z: -48, side: 'north' },
-        { label: '5号館 2F連絡デッキ口', x: -52, z: -22, side: 'west' },
-        { label: '4号館 2F連絡デッキ口', x: -56, z: -22, side: 'east' },
-        { label: '4号館 2F入口', x: -75, z: -48, side: 'north' }
+        { label: '5号館 2F入口', x: -48, z: -48, side: 'north' },
+        { label: '5号館 2F連絡通路口', x: -52, z: -44, side: 'west' },
+        { label: '4号館 2F連絡通路口', x: -56, z: -44, side: 'east' },
+        { label: '4号館 2F入口', x: -60, z: -48, side: 'north' }
       );
     }
 
@@ -1390,8 +1455,8 @@ export default function ThreeCampusViewer({ onClose }) {
             <ul className="text-xs space-y-1 text-slate-200 mb-3">
               <li><span className="font-bold text-white">W A S D / 矢印キー</span>：移動</li>
               <li><span className="font-bold text-white">🚪 1F入口 / 2F入口</span>：建物の出入り口</li>
+              <li><span className="font-bold text-white">階段（1F⇔2F）</span>：歩いて上り下り可能</li>
               <li><span className="font-bold text-white">青い枠の部屋</span>：教室・研究室・事務室</li>
-              <li><span className="font-bold text-white">グレー床の表記</span>：ホール・階段・トイレ（通過可）</li>
             </ul>
             <div className="pt-2 border-t border-slate-700">
               <span className="text-[11px] text-slate-400 block mb-1.5">階数ダイレクト切替</span>
