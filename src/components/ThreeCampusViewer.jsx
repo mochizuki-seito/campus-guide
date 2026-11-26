@@ -161,6 +161,34 @@ function buildConnectedRooms(rawRooms, buildingZones) {
     const w = box.maxX - box.minX;
     const d = box.maxZ - box.minZ;
 
+    // 出入り口を付けない部屋（noDoor: true）
+    if (box.noDoor) {
+      return {
+        ...box,
+        x,
+        z,
+        w,
+        d,
+        doorSide: null,
+        doorWidth: 0,
+      };
+    }
+
+    // 出入り口の向きが明示指定されている場合
+    if (box.doorSide) {
+      const sideLen = box.doorSide === 'north' || box.doorSide === 'south' ? w : d;
+      const doorWidth = Math.min(2.4, Math.max(1.4, sideLen * 0.55));
+      return {
+        ...box,
+        x,
+        z,
+        w,
+        d,
+        doorSide: box.doorSide,
+        doorWidth,
+      };
+    }
+
     const candidates = [
       { side: 'south', px: x, pz: box.maxZ + 1.5, len: w },
       { side: 'north', px: x, pz: box.minZ - 1.5, len: w },
@@ -564,7 +592,7 @@ function EntranceGateMarker({ entrance }) {
   );
 }
 
-// 教室・研究室・事務室・風除室（壁とドア付き）
+// 教室・研究室・事務室・風除室（壁とドア付き、noDoorの場合は4面壁閉じ）
 function RoomBox({ room }) {
   const wallH = 2.7;
   const wallT = 0.22;
@@ -663,11 +691,17 @@ function RoomBox({ room }) {
 
       <lineSegments position={[0, wallH / 2, 0]}>
         <edgesGeometry args={[new THREE.BoxGeometry(w, wallH, d)]} />
-        <lineBasicMaterial color="#1e3a8a" />
+        <lineBasicMaterial color={room.noDoor ? '#475569' : '#1e3a8a'} />
       </lineSegments>
 
       <Html position={[0, 3.05, 0]} center distanceFactor={26} zIndexRange={[10, 0]}>
-        <div className="bg-slate-900/90 text-white px-2 py-0.5 rounded text-[10px] font-bold whitespace-pre-line text-center shadow border border-blue-400 pointer-events-none select-none leading-tight">
+        <div
+          className={`px-2 py-0.5 rounded text-[10px] font-bold whitespace-pre-line text-center shadow border pointer-events-none select-none leading-tight ${
+            room.noDoor
+              ? 'bg-slate-800/90 text-slate-200 border-slate-500'
+              : 'bg-slate-900/90 text-white border-blue-400'
+          }`}
+        >
           {room.name}
         </div>
       </Html>
@@ -777,6 +811,14 @@ function PlayerController({
     const maxX = room.x + halfW;
     const minZ = room.z - halfD;
     const maxZ = room.z + halfD;
+
+    // 出入り口なしの部屋（駐車場・多目的スペース1・警備準備室）はエリア全体をブロック
+    if (room.noDoor) {
+      if (px >= minX - wallThick && px <= maxX + wallThick && pz >= minZ - wallThick && pz <= maxZ + wallThick) {
+        return true;
+      }
+      return false;
+    }
 
     if (px < minX - wallThick || px > maxX + wallThick || pz < minZ - wallThick || pz > maxZ + wallThick) {
       return false;

@@ -488,18 +488,20 @@ export const CAMPUS_3D_BUILDINGS = {
         buildingZones: [
           { name: '5号館', minX: -52, maxX: -16, minZ: -48, maxZ: -14, floorColor: '#e2e8f0' },
         ],
-        // 壁で囲まれた部屋（教室・事務室・風除室・多目的スペース）
+        // 壁で囲まれた部屋（教室・事務室・風除室・多目的スペース・駐車場）
         rooms: [
           // 信号前1F入口（平面図左上・赤丸の風除室）
           { id: '5-fujo-se', name: '風除室\n(信号前1F入口)', x: -18.5, z: -16.5, w: 5, d: 5, color: UNIFIED_ROOM_COLOR },
           // 北側1F入口（平面図下中央・芝生広場側の風除室）
           { id: '5-fujo-n', name: '風除室\n(北側1F入口)', x: -34, z: -45.5, w: 5, d: 5, color: UNIFIED_ROOM_COLOR },
-          // 南西側 多目的スペース1（平面図右上）
-          { id: '5-multi1', name: '多目的スペース1', x: -41, z: -18.5, w: 10, d: 9, color: UNIFIED_ROOM_COLOR },
-          // 中央 警備準備室
-          { id: '5-keibi', name: '警備準備室', x: -35, z: -25.5, w: 5, d: 4.5, color: UNIFIED_ROOM_COLOR },
-          // 北西側（4号館側）5-101 教室
-          { id: '5-101', name: '5-101 教室', x: -42, z: -39.5, w: 16, d: 7, color: UNIFIED_ROOM_COLOR },
+          // 南西側 多目的スペース1（出入り口なし・壁閉じ）
+          { id: '5-multi1', name: '多目的スペース1', x: -41, z: -18.5, w: 10, d: 9, color: UNIFIED_ROOM_COLOR, noDoor: true },
+          // 中央 警備準備室（出入り口なし・壁閉じ）
+          { id: '5-keibi', name: '警備準備室', x: -35, z: -25.5, w: 5, d: 4.5, color: UNIFIED_ROOM_COLOR, noDoor: true },
+          // 西側 駐車場（ピロティ）（出入り口なし・壁閉じ）
+          { id: '5-park1', name: '駐車場（ピロティ）', x: -49, z: -25, w: 5, d: 14, color: '#94a3b8', noDoor: true },
+          // 北西側（4号館側）5-101 教室（出入り口は学生ホール側＝東側）
+          { id: '5-101', name: '5-101 教室', x: -42, z: -39.5, w: 16, d: 7, color: UNIFIED_ROOM_COLOR, doorSide: 'east' },
         ],
         // 壁なし・オープンスペース＆共用設備（平面図・内部写真準拠）
         facilities: [
@@ -513,9 +515,7 @@ export const CAMPUS_3D_BUILDINGS = {
           { id: '5-stair-atrium', name: '吹き抜け大階段（1F⇔2F）', x: -26.2, z: -36, w: 2.6, d: 14 },
           // 中央 トイレ（M / W / 多目的）
           { id: '5-wc1', name: 'トイレ (M / W / 多目的)', x: -39, z: -32.5, w: 10, d: 7 },
-          // 西側 ピロティ駐車場
-          { id: '5-park1', name: '駐車場（ピロティ）', x: -49, z: -25, w: 5, d: 14 },
-          // 階段③：北西（5-101教室北側：東X=-41から西X=-51へ上り2Fデッキへ）
+          // 階段③：北西（5-101教室北側：東X=-41から西X=-51へ上り2F入口・連絡通路へ）
           { id: '5-stair-nw', name: '北西階段（2F入口・連絡通路へ）', x: -46, z: -45.5, w: 10, d: 4 },
         ],
         elevators: [
@@ -528,7 +528,6 @@ export const CAMPUS_3D_BUILDINGS = {
         buildingZones: [
           { name: '5号館', minX: -52, maxX: -16, minZ: -48, maxZ: -14, floorColor: '#e2e8f0' },
         ],
-        // 1F学生ホール上部の吹き抜け（南側階段・北側2F回廊は歩けるように確保）
         voids: [
           { name: '吹き抜け（1F学生ホール上部）', x: -20.5, z: -33, w: 7, d: 18 },
         ],
